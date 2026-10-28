@@ -245,7 +245,9 @@ export function initImageCropper() {
     canvas.addEventListener('mouseleave', () => { isDragging = false; });
 
     document.addEventListener('keydown', e => {
-        if (editorEl.classList.contains('hidden')) return;
+        // Only while the cropper is on screen, and never steal arrows from text fields
+        if (editorEl.classList.contains('hidden') || editorEl.offsetParent === null) return;
+        if (e.target.closest('input, textarea, select, [contenteditable]')) return;
         if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
         e.preventDefault();
         const step = e.shiftKey ? 10 : 1;
