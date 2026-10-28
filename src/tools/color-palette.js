@@ -1,3 +1,5 @@
+import { showToast } from '../toast.js';
+
 export function initColorPalette() {
     const drop = document.getElementById('palette-drop');
     const input = document.getElementById('palette-input');
@@ -31,7 +33,11 @@ export function initColorPalette() {
     }
 
     function handleFile(file) {
-        if (!file || !file.type.startsWith('image/')) return;
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showToast(`Skipped ${file.name}: please choose an image file.`, 'warning');
+            return;
+        }
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
@@ -41,6 +47,10 @@ export function initColorPalette() {
             displayPalette(extractPalette(img, count));
             drop.classList.add('hidden');
             resultsEl.classList.remove('hidden');
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            showToast(`Could not read ${file.name}: the image is damaged or in an unsupported format.`, 'error');
         };
         img.src = url;
     }
