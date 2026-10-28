@@ -1,3 +1,4 @@
+import { showToast } from '../toast.js';
 import { downloadZip } from '../download.js';
 
 export function initPdfConverter() {
@@ -13,6 +14,7 @@ export function initPdfConverter() {
     const progressLabel = document.getElementById('pdf-progress-label');
     const progressPct = document.getElementById('pdf-progress-pct');
     let pdfFiles = [];
+    const failedFiles = [];
 
     if(!drop) return; // Guard clause
 
@@ -36,8 +38,17 @@ export function initPdfConverter() {
             
             reader.onload = async (e) => {
                 const typedarray = new Uint8Array(e.target.result);
-                const pdf = await window.pdfjsLib.getDocument(typedarray).promise;
-                
+                let pdf;
+                try {
+                    pdf = await window.pdfjsLib.getDocument(typedarray).promise;
+                } catch (err) {
+                    console.error(`Could not open ${file.name}:`, err);
+                    failedFiles.push({ file, message: err.message || String(err) });
+                    showToast(`Could not open ${file.name}: it is not a valid PDF.`, 'error');
+                    updatePdfUi();
+                    return;
+                }
+
                 pdfFiles.push({ file, pdf, id });
                 
                 // 1. Rebuild the UI to create the canvas element
@@ -91,6 +102,20 @@ export function initPdfConverter() {
                     <div class="text-xs text-slate-500">${obj.pdf.numPages} Pages</div>
                 </div>
             `;
+            list.appendChild(item);
+        });
+        failedFiles.forEach(({ file, message }) => {
+            const item = document.createElement('div');
+            item.className = "flex items-center bg-red-50 p-3 rounded border border-red-200";
+            item.innerHTML = `
+                <div class="h-16 w-12 bg-red-100 mr-4 rounded flex items-center justify-center text-[10px] font-bold text-red-500 shrink-0">Error</div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-sm truncate"></div>
+                    <div class="text-xs text-red-500 truncate"></div>
+                </div>
+            `;
+            item.querySelector('.font-bold.text-sm').textContent = file.name;
+            item.querySelector('.text-red-500.truncate').textContent = `Could not open: ${message}`;
             list.appendChild(item);
         });
     }
