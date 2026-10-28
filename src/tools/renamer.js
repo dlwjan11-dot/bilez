@@ -58,6 +58,8 @@ export function initRenamer() {
     });
 
     function getSettings() {
+        // 0 is a valid start (the field allows min=0), so don't fall back with ||
+        const start = parseInt(seqStartInp ? seqStartInp.value : '1', 10);
         return {
             stripMin: stripMinCheck ? stripMinCheck.checked : false,
             prefix: prefixInp ? prefixInp.value : '',
@@ -65,7 +67,7 @@ export function initRenamer() {
             find: findInp ? findInp.value : '',
             replace: replaceInp ? replaceInp.value : '',
             sequential: sequentialCheck ? sequentialCheck.checked : false,
-            seqStart: parseInt(seqStartInp ? seqStartInp.value : '1', 10) || 1,
+            seqStart: Number.isFinite(start) && start >= 0 ? start : 1,
             seqPad: parseInt(seqPadInp ? seqPadInp.value : '3', 10) || 3,
         };
     }
@@ -130,6 +132,18 @@ export function initRenamer() {
         const dupes = names.filter(n => n.duplicate).length;
         statusEl.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} ready.`
             + (dupes ? ` ${dupes} duplicate name${dupes !== 1 ? 's were' : ' was'} numbered so no file is lost.` : '');
+    }
+
+    const clearBtn = document.getElementById('renamer-clear');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            files = [];
+            listEl.innerHTML = '';
+            statusEl.textContent = '';
+            fileCountEl.classList.add('hidden');
+            optionsPanel.classList.add('hidden');
+            previewPanel.classList.add('hidden');
+        });
     }
 
     dlBtn.addEventListener('click', async () => {

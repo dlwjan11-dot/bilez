@@ -69,6 +69,12 @@ test.describe('Renamer', () => {
         await uploadViaClick(page, '#renamer-drop', ['empty.png']);
         await expect(page.locator('#renamer-file-count')).toHaveText('1 file loaded');
         expect(await previewNames(page)).toEqual(['x_empty.png']);
-        expect.soft(await page.locator('#tool-renamer button:has-text("Clear")').count(), 'a way to clear the file list').toBeGreaterThan(0);
+        await page.click('#renamer-clear');
+        await expect(page.locator('#renamer-preview-panel')).toBeHidden();
+        await expect(page.locator('#renamer-options')).toBeHidden();
+        await expect(page.locator('#renamer-file-count')).toBeHidden();
+        await dropFiles(page, '#renamer-drop', ['small.jpg']);
+        await expect(page.locator('#renamer-file-count')).toHaveText('1 file loaded');
+        expect(await previewNames(page), 'rules are kept after Clear').toEqual(['x_small.jpg']);
     });
 });
