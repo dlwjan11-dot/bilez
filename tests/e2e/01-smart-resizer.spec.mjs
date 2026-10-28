@@ -92,6 +92,11 @@ test.describe('Smart Resizer', () => {
         await page.click('.smart-preset-btn[data-width="1920"]'); await settle(page);
         expect.soft(await dims(page, 0), 'preset "Subpage Banner 1920×600" should give 1920×600').toBe('4000x3000 → 1920x600');
 
+        await page.click('.smart-preset-btn[data-width="100"]'); await settle(page);
+        expect.soft(await dims(page, 0), 'tall preset 100×700 on a landscape image is centre-cropped').toBe('4000x3000 → 100x700');
+        const m = await meta(await saveCard(ctx, 0, 'large-min.webp'));
+        expect([m.width, m.height], 'saved file is exactly the preset size').toEqual([100, 700]);
+
         await page.click('.smart-mode-btn[data-mode="auto"]'); await settle(page);
         await expect(page.locator('#smart-manual-inputs')).toHaveClass(/pointer-events-none/);
     });

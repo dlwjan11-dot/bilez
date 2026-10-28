@@ -420,6 +420,7 @@ export function initSmartResizer() {
             let w = img.naturalWidth; let h = img.naturalHeight;
             const ratio = w / h;
             let targetW = w; let targetH = h;
+            let exactSize = false; // width AND height given: output exactly that size, centre-cropped
 
             if (resizeMode === 'auto') {
                 if (w > h) { targetW = 1920; targetH = targetW / ratio; } else { targetH = 1920; targetW = targetH * ratio; }
@@ -427,7 +428,7 @@ export function initSmartResizer() {
             } else if (resizeMode === 'portrait') { targetH = 1920; targetW = targetH * ratio;
             } else if (resizeMode === 'manual') {
                 const cw = parseInt(widthInp.value); const ch = parseInt(heightInp.value);
-                if (cw && ch) { targetW = cw; targetH = ch;
+                if (cw && ch) { targetW = cw; targetH = ch; exactSize = true;
                 } else if (cw) { targetW = cw; targetH = cw / ratio;
                 } else if (ch) { targetH = ch; targetW = ch * ratio; }
             } else if (resizeMode === 'none') {
@@ -462,11 +463,12 @@ export function initSmartResizer() {
             if (ipcRenderer) {
                 bufferArray = await ipcRenderer.invoke('process-image-sharp', {
                     fileData: fileBuffer,
-                    targetW: targetW !== w ? targetW : null,
-                    targetH: targetH !== h ? targetH : null,
+                    targetW: exactSize || targetW !== w ? targetW : null,
+                    targetH: exactSize || targetH !== h ? targetH : null,
                     quality: targetQuality,
                     format: formatName,
-                    allowUpscale: upscaleCheckbox ? upscaleCheckbox.checked : false
+                    allowUpscale: upscaleCheckbox ? upscaleCheckbox.checked : false,
+                    fit: exactSize ? 'cover' : 'inside'
                 });
             } else {
                 const canvas = document.createElement('canvas');
@@ -477,7 +479,15 @@ export function initSmartResizer() {
 
                 canvas.width = Math.max(1, Math.round(targetW || w));
                 canvas.height = Math.max(1, Math.round(targetH || h));
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                if (exactSize) {
+                    // centre-crop the source to the target aspect ratio (same as sharp's fit: 'cover')
+                    const scale = Math.max(canvas.width / w, canvas.height / h);
+                    const sw = canvas.width / scale;
+                    const sh = canvas.height / scale;
+                    ctx.drawImage(img, (w - sw) / 2, (h - sh) / 2, sw, sh, 0, 0, canvas.width, canvas.height);
+                } else {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                }
 
                 const outputType = formatName === 'webp' ? 'image/webp' : formatName === 'png' ? 'image/png' : 'image/jpeg';
                 if (outputType !== mime) {

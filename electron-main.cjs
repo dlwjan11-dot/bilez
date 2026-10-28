@@ -62,7 +62,8 @@ app.on('window-all-closed', () => {
 
 // --- NEW NATIVE BACKEND BRIDGE (MEMORY BUFFER) ---
 ipcMain.handle('process-image-sharp', async (event, config) => {
-  const { fileData, targetW, targetH, quality, format, allowUpscale } = config;
+  // fit: 'inside' keeps the aspect ratio within the box; 'cover' fills the exact box, centre-cropping the excess
+  const { fileData, targetW, targetH, quality, format, allowUpscale, fit = 'inside' } = config;
 
   try {
     // 1. Convert the raw memory sent from the frontend into a native Buffer
@@ -74,8 +75,10 @@ ipcMain.handle('process-image-sharp', async (event, config) => {
       engine = engine.resize({
         width: targetW ? Math.round(targetW) : undefined,
         height: targetH ? Math.round(targetH) : undefined,
-        fit: 'inside',
-        withoutEnlargement: !allowUpscale
+        fit,
+        position: 'centre',
+        // an exact size was asked for, so a smaller source has to be enlarged to reach it
+        withoutEnlargement: fit === 'cover' ? false : !allowUpscale
       });
     }
 
