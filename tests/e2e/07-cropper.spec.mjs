@@ -96,7 +96,7 @@ test.describe('Image cropper', () => {
         const saved = await waitForFile(ctx.out('landscape_cropped.webp'), 6000);
         expect.soft(saved, 'Select All crop of 2560×1440 WebP should save').not.toBeNull();
         await expect(page.locator('#crop-download')).toHaveText('Download Crop');
-        expect.soft(await toastText(page), 'user told that the crop failed').toMatch(/crop|fail|error/i);
+        if (!saved) expect.soft(await toastText(page), 'user told that the crop failed').toMatch(/crop|fail|error/i);
 
         await page.click('#crop-new-image');
         await expect(page.locator('#crop-drop')).toBeVisible();

@@ -1,3 +1,4 @@
+import { showToast } from '../toast.js';
 import { downloadBlob } from '../download.js';
 
 const HANDLE_R = 5; // corner handle hit radius in canvas px
@@ -120,11 +121,26 @@ export function initImageCropper() {
         ];
     }
 
+    // Map the display-space crop to source pixels. Edges are converted (not x + width)
+    // with a per-axis scale, so a full-canvas selection is exactly the full image and
+    // rounding can never step outside it.
+    function toImageRect() {
+        const natW = sourceImg.naturalWidth;
+        const natH = sourceImg.naturalHeight;
+        const sx = natW / canvas.width;
+        const sy = natH / canvas.height;
+        const clamp = (v, max) => Math.max(0, Math.min(max, Math.round(v)));
+        const left = clamp(crop.x * sx, natW);
+        const top = clamp(crop.y * sy, natH);
+        const right = clamp((crop.x + crop.w) * sx, natW);
+        const bottom = clamp((crop.y + crop.h) * sy, natH);
+        return { left, top, width: right - left, height: bottom - top };
+    }
+
     function updateDims() {
         if (crop.w > 0 && crop.h > 0) {
-            const rw = Math.round(crop.w / displayScale);
-            const rh = Math.round(crop.h / displayScale);
-            dimsEl.textContent = `${rw} × ${rh} px`;
+            const { width, height } = toImageRect();
+            dimsEl.textContent = `${width} × ${height} px`;
         } else {
             dimsEl.textContent = '';
         }
@@ -293,10 +309,8 @@ export function initImageCropper() {
     downloadBtn.addEventListener('click', async () => {
         if (!sourceFile || crop.w < 1 || crop.h < 1) return;
 
-        const imgX = Math.round(crop.x / displayScale);
-        const imgY = Math.round(crop.y / displayScale);
-        const imgW = Math.round(crop.w / displayScale);
-        const imgH = Math.round(crop.h / displayScale);
+        const { left: imgX, top: imgY, width: imgW, height: imgH } = toImageRect();
+        if (imgW < 1 || imgH < 1) return;
 
         const outName = sourceFile.name.replace(/(\.[^.]+)$/, '_cropped$1');
 
@@ -314,6 +328,9 @@ export function initImageCropper() {
             const fileBuffer = await sourceFile.arrayBuffer();
             const result = await ipcRenderer.invoke('crop-image', { fileData: fileBuffer, left: imgX, top: imgY, width: imgW, height: imgH });
             await downloadBlob(new Blob([result]), outName);
+        } catch (err) {
+            console.error('Crop failed:', err);
+            showToast('Crop failed: ' + (err.message || err), 'error');
         } finally {
             downloadBtn.disabled = false;
             downloadBtn.textContent = 'Download Crop';
