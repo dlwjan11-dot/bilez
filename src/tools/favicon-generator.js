@@ -68,14 +68,21 @@ export function initFaviconGenerator() {
         }
 
         const url = URL.createObjectURL(file);
-        preview.src = url;
-
-        sourceImage = new Image();
-        sourceImage.src = url;
-
-        drop.classList.add('hidden');
-        ui.classList.remove('hidden');
-        status.textContent = "Ready to generate!";
+        const img = new Image();
+        // Only switch to the generate UI once the image actually decodes
+        img.onload = () => {
+            sourceImage = img;
+            preview.src = url;
+            drop.classList.add('hidden');
+            ui.classList.remove('hidden');
+            status.textContent = "Ready to generate!";
+            status.className = "text-sm text-slate-500 mt-3 font-medium";
+        };
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            showToast(`Could not read ${file.name} as an image.`, 'error');
+        };
+        img.src = url;
     }
 
     btn.addEventListener('click', async () => {
@@ -85,14 +92,23 @@ export function initFaviconGenerator() {
         status.textContent = "Cutting icons...";
         status.className = "text-sm mt-3 font-bold text-blue-500";
 
+        try {
+            await generateZip();
+            status.textContent = "Done! Check your downloads.";
+            status.className = "text-sm mt-3 font-bold text-green-600";
+        } catch (err) {
+            console.error('Favicon generation failed:', err);
+            status.textContent = `Failed: ${err.message || err}`;
+            status.className = "text-sm mt-3 font-bold text-red-500";
+        } finally {
+            setTimeout(() => { btn.disabled = false; }, 1500);
+        }
+    });
+
+    async function generateZip() {
         const zipFiles = [];
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-
-        await new Promise(resolve => {
-            if (sourceImage.complete) resolve();
-            else sourceImage.onload = resolve;
-        });
 
         let favicon32Blob = null;
 
@@ -156,10 +172,5 @@ export function initFaviconGenerator() {
         status.textContent = "Zipping files...";
 
         await downloadZip(zipFiles, 'website_icons.zip');
-
-        status.textContent = "Done! Check your downloads.";
-        status.className = "text-sm mt-3 font-bold text-green-600";
-
-        setTimeout(() => { btn.disabled = false; }, 1500);
-    });
+    }
 }

@@ -62,6 +62,7 @@ test.describe('Favicon generator', () => {
         await expect(page.locator('#fav-ui')).toBeHidden();
 
         await dropFiles(page, '#fav-drop', ['empty.png']);
+        await expect(page.locator('#toast-container')).toContainText('Could not read empty.png');
         expect.soft(await page.locator('#fav-ui').isVisible(), 'an unreadable image should be rejected before showing the generate UI').toBe(false);
         if (await page.locator('#fav-generate-btn').isVisible()) {
             await page.click('#fav-generate-btn');
