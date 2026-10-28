@@ -45,17 +45,26 @@ export function initImageCropper() {
     input.addEventListener('change', e => { handleFile(e.target.files[0]); input.value = ''; });
 
     function handleFile(file) {
-        if (!file || !file.type.startsWith('image/')) return;
-        sourceFile = file;
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showToast(`Skipped ${file.name}: please choose an image file.`, 'warning');
+            return;
+        }
         const url = URL.createObjectURL(file);
-        sourceImg = new Image();
-        sourceImg.onload = () => {
+        const img = new Image();
+        img.onload = () => {
             URL.revokeObjectURL(url);
+            sourceFile = file;
+            sourceImg = img;
             setupCanvas();
             drop.classList.add('hidden');
             editorEl.classList.remove('hidden');
         };
-        sourceImg.src = url;
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            showToast(`Could not read ${file.name}: the image is damaged or in an unsupported format.`, 'error');
+        };
+        img.src = url;
     }
 
     function setupCanvas() {
@@ -333,10 +342,12 @@ export function initImageCropper() {
 
     // ── Download ──────────────────────────────────────────────────────
     downloadBtn.addEventListener('click', async () => {
-        if (!sourceFile || crop.w < 1 || crop.h < 1) return;
-
+        if (!sourceFile) return;
         const { left: imgX, top: imgY, width: imgW, height: imgH } = toImageRect();
-        if (imgW < 1 || imgH < 1) return;
+        if (crop.w < 1 || crop.h < 1 || imgW < 1 || imgH < 1) {
+            showToast('Select an area to crop first (drag on the image), or use Select All.', 'warning');
+            return;
+        }
 
         const outName = sourceFile.name.replace(/(\.[^.]+)$/, '_cropped$1');
 
