@@ -13,41 +13,60 @@ export function initPdfConverter() {
     const progressBar = document.getElementById('pdf-progress-bar');
     const progressLabel = document.getElementById('pdf-progress-label');
     const progressPct = document.getElementById('pdf-progress-pct');
+    const clearBtn = document.getElementById('pdf-clear');
     let pdfFiles = [];
     const failedFiles = [];
+    let session = 0; // bumped by Clear so PDFs still parsing don't reappear afterwards
 
     if(!drop) return; // Guard clause
 
     drop.addEventListener('click', () => input.click());
-    input.addEventListener('change', e => handlePdfs(e.target.files));
+    input.addEventListener('change', e => { handlePdfs(e.target.files); input.value = ''; });
     drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-active'); });
     drop.addEventListener('dragleave', () => drop.classList.remove('drag-active'));
     drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag-active'); handlePdfs(e.dataTransfer.files); });
 
-    async function handlePdfs(files) {
-        if(!files.length) return;
-        drop.classList.add('hidden');
-        ui.classList.remove('hidden');
-        
-        for(const file of files) {
-            const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
-            if(!isPdf) continue;
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            session++;
+            pdfFiles = [];
+            failedFiles.length = 0;
+            list.innerHTML = '';
+            countBadge.textContent = '0';
+            status.textContent = '';
+            ui.classList.add('hidden');
+        });
+    }
 
+    async function handlePdfs(fileList) {
+        const all = Array.from(fileList);
+        const files = all.filter(file => file.type === 'application/pdf' || /\.pdf$/i.test(file.name));
+        all.filter(file => !files.includes(file))
+            .forEach(file => showToast(`Skipped ${file.name}: only PDF files can be converted.`, 'warning'));
+        if (!files.length) return;
+        // The drop zone stays visible so more PDFs can be added to the list
+        ui.classList.remove('hidden');
+        const mySession = session;
+
+        for(const file of files) {
             const id = Math.random().toString(36).substr(2,9);
             const reader = new FileReader();
-            
+
             reader.onload = async (e) => {
+                if (mySession !== session) return;
                 const typedarray = new Uint8Array(e.target.result);
                 let pdf;
                 try {
                     pdf = await window.pdfjsLib.getDocument(typedarray).promise;
                 } catch (err) {
+                    if (mySession !== session) return;
                     console.error(`Could not open ${file.name}:`, err);
                     failedFiles.push({ file, message: err.message || String(err) });
                     showToast(`Could not open ${file.name}: it is not a valid PDF.`, 'error');
                     updatePdfUi();
                     return;
                 }
+                if (mySession !== session) return;
 
                 pdfFiles.push({ file, pdf, id });
                 
@@ -121,10 +140,14 @@ export function initPdfConverter() {
     }
 
     btn.addEventListener('click', async () => {
+        const totalPages = pdfFiles.reduce((sum, obj) => sum + obj.pdf.numPages, 0);
+        if (!totalPages) {
+            showToast('Add at least one valid PDF before converting.', 'warning');
+            return;
+        }
+
         btn.disabled = true;
         const zipFiles = [];
-
-        const totalPages = pdfFiles.reduce((sum, obj) => sum + obj.pdf.numPages, 0);
         let pagesProcessed = 0;
 
         progressEl.classList.remove('hidden');
@@ -146,7 +169,7 @@ export function initPdfConverter() {
                 await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
 
                 const data = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-                const cleanName = obj.file.name.replace('.pdf', '');
+                const cleanName = obj.file.name.replace(/\.pdf$/i, '');
                 const binary = atob(data);
                 const bytes = new Uint8Array(binary.length);
                 for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);

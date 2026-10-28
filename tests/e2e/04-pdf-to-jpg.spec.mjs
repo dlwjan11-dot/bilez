@@ -63,8 +63,22 @@ test.describe('PDF to JPG', () => {
         const { page } = ctx;
         await uploadViaClick(page, '#pdf-drop', ['three-pages.pdf']);
         await expect(page.locator('#pdf-list')).toContainText('3 Pages', { timeout: 20000 });
-        const canAddOrClear = await page.locator('#pdf-drop').isVisible()
-            || await page.locator('#tool-pdf button:has-text("Clear"), #tool-pdf button:has-text("Add")').count() > 0;
-        expect.soft(canAddOrClear, 'after the first upload there is no way to add more PDFs or clear the list').toBe(true);
+        await expect(page.locator('#pdf-drop'), 'drop zone stays available for more PDFs').toBeVisible();
+
+        await dropFiles(page, '#pdf-drop', ['ملف عربي.pdf', 'corrupt.pdf']);
+        await expect(page.locator('#pdf-count')).toHaveText('2', { timeout: 20000 });
+        await expect(page.locator('#pdf-list')).toContainText('Could not open');
+        await uploadViaClick(page, '#pdf-drop', ['three-pages.pdf']);
+        await expect(page.locator('#pdf-count'), 're-selecting the same file adds it again').toHaveText('3', { timeout: 20000 });
+
+        await page.click('#pdf-clear');
+        await expect(page.locator('#pdf-ui-container')).toBeHidden();
+        await expect(page.locator('#pdf-count')).toHaveText('0');
+
+        await dropFiles(page, '#pdf-drop', ['UPPER CASE.PDF']);
+        await expect(page.locator('#pdf-count')).toHaveText('1', { timeout: 20000 });
+        await page.click('#pdf-action-btn');
+        const entries = await readZip(await expectSaved(ctx.out('pdf_converted.zip'), 30000));
+        expect(Object.keys(entries), 'only the PDF added after Clear is converted').toEqual(['UPPER CASE_page_1.jpg']);
     });
 });
