@@ -1,5 +1,6 @@
 import { optimize } from 'svgo/browser';
-import { downloadBlob, downloadZip } from '../download.js';
+import { showToast } from '../toast.js';
+import { downloadZip, makeUniqueName } from '../download.js';
 
 export function initSvgOptimizer() {
     const drop = document.getElementById('svg-drop');
@@ -24,9 +25,12 @@ export function initSvgOptimizer() {
     input.addEventListener('change', e => { handleFiles(e.target.files); input.value = ''; });
 
     async function handleFiles(fileList) {
-        const svgFiles = Array.from(fileList).filter(f =>
+        const all = Array.from(fileList);
+        const svgFiles = all.filter(f =>
             f.name.toLowerCase().endsWith('.svg') || f.type === 'image/svg+xml'
         );
+        all.filter(f => !svgFiles.includes(f))
+            .forEach(f => showToast(`Skipped ${f.name}: only SVG files can be optimized.`, 'warning'));
         if (!svgFiles.length) return;
 
         resultSection.classList.remove('hidden');
@@ -82,11 +86,24 @@ export function initSvgOptimizer() {
         if (optimizedFiles.length > 1) dlAllBtn.classList.remove('hidden');
     }
 
+    const clearBtn = document.getElementById('svg-clear');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            optimizedFiles = [];
+            listEl.querySelectorAll('a[href^="blob:"]').forEach(a => URL.revokeObjectURL(a.href));
+            listEl.innerHTML = '';
+            statusEl.textContent = '';
+            dlAllBtn.classList.add('hidden');
+            resultSection.classList.add('hidden');
+        });
+    }
+
     dlAllBtn.addEventListener('click', async () => {
         dlAllBtn.textContent = "Zipping...";
         dlAllBtn.disabled = true;
 
-        const files = optimizedFiles.map(f => ({ name: f.name, data: f.data }));
+        const used = new Set();
+        const files = optimizedFiles.map(f => ({ name: makeUniqueName(f.name, used), data: f.data }));
         await downloadZip(files, 'optimized_svgs.zip');
 
         dlAllBtn.textContent = "Download All as ZIP";

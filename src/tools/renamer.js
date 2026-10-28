@@ -1,4 +1,4 @@
-import { downloadZip } from '../download.js';
+import { downloadZip, makeUniqueName } from '../download.js';
 
 export function initRenamer() {
     const drop = document.getElementById('renamer-drop');
@@ -87,22 +87,12 @@ export function initRenamer() {
         return base + ext;
     }
 
-    // Names must be unique or the ZIP silently keeps only the last file with that name.
-    // Duplicates (case-insensitive, as on Windows) get "-2", "-3"… before the extension.
+    // Names must be unique or the ZIP silently keeps only the last file with that name
     function computeAllNames(settings) {
         const used = new Set();
         return files.map((file, idx) => {
             const name = computeNewName(file, idx, settings);
-            let unique = name;
-            if (used.has(unique.toLowerCase())) {
-                const dot = name.lastIndexOf('.');
-                const base = dot > 0 ? name.slice(0, dot) : name;
-                const ext = dot > 0 ? name.slice(dot) : '';
-                let n = 2;
-                while (used.has(`${base}-${n}${ext}`.toLowerCase())) n++;
-                unique = `${base}-${n}${ext}`;
-            }
-            used.add(unique.toLowerCase());
+            const unique = makeUniqueName(name, used);
             return { name: unique, duplicate: unique !== name };
         });
     }

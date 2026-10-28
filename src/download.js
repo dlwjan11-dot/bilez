@@ -15,6 +15,23 @@ function browserSave(url, filename) {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+// Return `name`, or "name-2.ext", "name-3.ext"… if it is already in `used` (a Set of
+// lower-cased names, since Windows paths are case-insensitive). Adds the result to `used`.
+// ZIP entries with the same name overwrite each other, so use this for every ZIP.
+export function makeUniqueName(name, used) {
+    let unique = name;
+    if (used.has(unique.toLowerCase())) {
+        const dot = name.lastIndexOf('.');
+        const base = dot > 0 ? name.slice(0, dot) : name;
+        const ext = dot > 0 ? name.slice(dot) : '';
+        let n = 2;
+        while (used.has(`${base}-${n}${ext}`.toLowerCase())) n++;
+        unique = `${base}-${n}${ext}`;
+    }
+    used.add(unique.toLowerCase());
+    return unique;
+}
+
 // Save a single Blob to disk
 export async function downloadBlob(blob, filename) {
     if (_ipc) {

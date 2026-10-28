@@ -46,8 +46,14 @@ test.describe('SVG optimizer', () => {
         await expect(page.locator('#svg-status')).toHaveText('2 files optimized.');
         await page.click('#svg-download-all');
         const entries = await readZip(await expectSaved(ctx.out('optimized_svgs.zip')));
-        expect.soft(Object.keys(entries).length, 'two optimized files → two entries (same name overwrites)').toBe(2);
-        expect.soft(await page.locator('#tool-svg button:has-text("Clear")').count(), 'a way to clear the list').toBeGreaterThan(0);
+        expect.soft(Object.keys(entries).sort(), 'two optimized files → two entries (same name is numbered)').toEqual(['icon-bloated-2.svg', 'icon-bloated.svg']);
         await shot(page, '06-svg-optimizer-errors');
+
+        await page.click('#svg-clear');
+        await expect(page.locator('#svg-results')).toBeHidden();
+        await dropFiles(page, '#svg-drop', ['شعار.svg']);
+        await expect(page.locator('#svg-status')).toHaveText('1 file optimized.');
+        await expect(page.locator('#svg-list > div')).toHaveCount(1);
+        await expect(page.locator('#svg-download-all')).toBeHidden();
     });
 });
