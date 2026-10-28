@@ -19,7 +19,7 @@ Node version is pinned in `.nvmrc` (22.12.0; `engines` requires >=20.19).
 
 `npm test` runs Playwright against the real Electron app (main process + `dist/`). Global setup regenerates fixtures (`tests/fixtures/generate.mjs`) and rebuilds `dist/` first, so no manual build is needed. One spec per tool in `tests/e2e/`; each test launches a fresh app with native save dialogs stubbed to write into `tests/output/<test>/`. Single spec: `npx playwright test 07` (filename match) or `-g "test title"`. `npm run test:report` prints a compact list of failed checks; screenshots go to `tests/screenshots/`, console/main-process logs to `tests/results/console-log.jsonl`. Many checks are `expect.soft` so one run reports every problem in a tool.
 
-`package.json` references `icon.ico` for the window/installer icon, but it is not currently in the repo.
+`icon.ico` (window + installer icon) is generated from `assets/icon.svg` (≥48px) and `assets/icon-small.svg` (≤32px) by `npm run icon`; edit the SVGs, not the .ico.
 
 ## Architecture
 

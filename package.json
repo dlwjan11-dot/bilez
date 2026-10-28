@@ -17,13 +17,15 @@
     "build-mac": "vite build && electron-builder --mac",
     "test": "playwright test",
     "test:report": "node tests/summarize.mjs",
-    "test:fixtures": "node tests/fixtures/generate.mjs"
+    "test:fixtures": "node tests/fixtures/generate.mjs",
+    "icon": "node scripts/make-icon.mjs"
   },
   "build": {
     "appId": "com.abdul.devsuite",
     "files": [
       "dist/**/*",
-      "electron-main.cjs"
+      "electron-main.cjs",
+      "icon.ico"
     ],
     "directories": {
       "output": "release"
