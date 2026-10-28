@@ -12,8 +12,9 @@ export function initTypescale() {
 
     let currentScaleData = { tokens: {}, fontFamily: 'Inter' };
     
-    // Listen for changes on all inputs
-    [base, scale, font, mode].forEach(el => {
+    // Listen for changes on all inputs (mode regenerates in its own change handler,
+    // after it has swapped the 16/64 default)
+    [base, scale, font].forEach(el => {
         if(el) el.addEventListener('input', generateTypeScale);
     });
 
@@ -25,6 +26,7 @@ export function initTypescale() {
             } else if (e.target.value === 'base' && base.value == 64) {
                 base.value = 16;
             }
+            generateTypeScale();
         });
     }
 
