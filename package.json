@@ -1,0 +1,59 @@
+{
+  "name": "dev-suite",
+  "version": "0.0.0",
+  "private": true,
+  "main": "electron-main.cjs",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron": "electron .",
+    "electron-build": "electron-builder",
+    "build-exe": "vite build && electron-builder --win",
+    "build-mac": "vite build && electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.abdul.devsuite",
+    "files": [
+      "dist/**/*",
+      "electron-main.cjs"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.developer-tools"
+    },
+    "dmg": {
+      "title": "Abdul Tools"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^41.1.0",
+    "electron-builder": "^26.8.1",
+    "vite": "^7.3.1",
+    "vite-plugin-singlefile": "^2.3.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.0",
+    "jszip": "^3.10.1",
+    "sharp": "^0.35.0",
+    "svgo": "^4.0.1",
+    "tailwindcss": "^4.2.0"
+  }
+}

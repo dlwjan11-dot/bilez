@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdul Tools | Creator Tools</title>
+
+    <style>
+        svg { max-width: 3rem !important; max-height: 3rem !important; }
+        .hidden { display: none !important; }
+        .tab-btn.active-tab { border-color: #3b82f6; color: #3b82f6; }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+
+    <!-- pdf.js loaded from CDN; worker is served from same CDN path -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+
+    <link rel="stylesheet" href="/src/style.css">
+    <script type="module" src="/src/main.js"></script>
+
+    <!-- Apply saved dark mode before paint to avoid flash -->
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme');
+            if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <nav class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-3 py-2.5 md:py-3">
+                <div class="flex items-center gap-3 md:gap-4 w-full md:w-auto justify-between md:justify-start">
+                    <div class="flex items-center gap-2.5">
+                        <span class="brand-mark">A</span>
+                        <div class="font-bold text-base md:text-xl tracking-wider text-blue-400">ABDUL TOOLS</div>
+                    </div>
+                    <button id="dark-toggle" data-tooltip="Switch between light and dark mode" title="Switch between light and dark mode" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
+                        <svg id="dark-icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                        <svg id="dark-icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </button>
+                </div>
+
+                <div class="nav-tabs-wrap w-full md:w-auto">
+                    <div class="flex items-center gap-1 md:gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar" id="nav-tabs">
+                        <button data-tab="smart" data-tooltip="Open Smart Resize to optimize, compress, and resize your images" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Smart Resize</button>
+                        <button data-tab="renamer" data-tooltip="Open the bulk file renamer to rename many files at once" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Renamer</button>
+                        <button data-tab="typescale" data-tooltip="Open Typescale to preview font size and spacing combinations" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Typescale</button>
+                        <button data-tab="pdf" data-tooltip="Convert PDF files into JPG images" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">PDF to JPG</button>
+                        <button data-tab="favicon" data-tooltip="Generate website favicons and app icons" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Favicon</button>
+                        <button data-tab="svg" data-tooltip="Optimize and clean up SVG files for smaller, cleaner output" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">SVG</button>
+                        <button data-tab="cropper" data-tooltip="Crop images with custom dimensions and output settings" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Cropper</button>
+                        <button data-tab="palette" data-tooltip="Extract color palettes from images and screenshots" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Palette</button>
+                        <button data-tab="formatter" data-tooltip="Format code and clean up text quickly" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Formatter</button>
+                        <button data-tab="base64" data-tooltip="Encode or decode Base64 text" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Base64</button>
+                        <button data-tab="cssbuilder" data-tooltip="Build CSS snippets and utility styles faster" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">CSS Builder</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto p-4 md:p-8 relative">
+
+        <!-- ==================== SMART RESIZER ==================== -->
+        <div id="tool-smart" class="tool-section">
+            <div class="max-w-6xl mx-auto">
+                <header class="tool-header text-center mb-8">
+                    <div class="inline-flex items-center justify-center gap-3 flex-wrap rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-700 mb-4">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Image workflow
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Smart Image Processor</h1>
+                    <p class="mt-2 text-slate-500">Resize, compress, and export your images without the usual trial and error.</p>
+                    <div class="mt-4 flex justify-center">
+                        <span class="status-pill status-ready">Ready</span>
+                    </div>
+                </header>
+                <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                    <div class="p-6 md:p-8 grid lg:grid-cols-12 gap-8 border-b border-slate-100">
+                        <div class="lg:col-span-5">
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">1. Upload Images</h2>
+                            <div id="smart-drop" data-tooltip="Upload JPG, PNG, HEIC, JXL, or WebP images for compression and resizing" class="border-2 border-dashed border-slate-300 rounded-xl h-48 flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-blue-50 hover:border-blue-400 group">
+                                <svg class="w-10 h-10 text-slate-300 group-hover:text-blue-400 mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                <p class="text-sm font-medium text-slate-600">Drag & Drop or Click</p>
+                                <p class="text-xs text-slate-400 mt-1">JPG, PNG, HEIC, JXL, WebP</p>
+                                <input type="file" id="smart-input" accept="image/*,.heic,.jxl,.heif" multiple class="hidden" data-tooltip="Choose one or more images to compress">
+                            </div>
+                            <div id="smart-counter" class="text-center text-xs font-bold text-blue-600 mt-2 hidden"></div>
+                        </div>
+                        <div class="lg:col-span-7">
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">2. Configure</h2>
+                            <div class="mb-6">
+                                <label class="block text-xs font-semibold text-slate-500 mb-2">RESIZE STRATEGY</label>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                                    <button class="smart-mode-btn bg-blue-600 text-white border-blue-600 p-2 rounded text-xs font-medium border shadow-sm transition-all" data-mode="auto" data-tooltip="Auto resize large images to a safe 1920px maximum width">Auto 1920px</button>
+                                    <button class="smart-mode-btn bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 p-2 rounded text-xs font-medium border transition-all" data-mode="landscape" data-tooltip="Resize images for wide landscape layouts">Landscape</button>
+                                    <button class="smart-mode-btn bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 p-2 rounded text-xs font-medium border transition-all" data-mode="portrait" data-tooltip="Resize images for tall portrait layouts">Portrait</button>
+                                    <button class="smart-mode-btn bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 p-2 rounded text-xs font-medium border transition-all" data-mode="none" data-tooltip="Keep the original dimensions and skip resizing">No Resize</button>
+                                </div>
+                                <div id="smart-manual-inputs" class="grid grid-cols-2 gap-3 opacity-50 pointer-events-none transition-opacity">
+                                    <div class="relative">
+                                        <input type="number" id="smart-w" placeholder="Width" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-sm pl-2">
+                                        <span class="absolute right-2 top-2 text-xs text-slate-400">px</span>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="number" id="smart-h" placeholder="Height" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-sm pl-2">
+                                        <span class="absolute right-2 top-2 text-xs text-slate-400">px</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 opacity-50 pointer-events-none transition-opacity" id="smart-preset-row">
+                                    <button type="button" class="smart-preset-btn bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 p-2 rounded text-[10px] font-medium transition-all" data-width="400" data-height="300">Callouts 400×300</button>
+                                    <button type="button" class="smart-preset-btn bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 p-2 rounded text-[10px] font-medium transition-all" data-width="1920" data-height="600">Subpage Banner 1920×600</button>
+                                    <button type="button" class="smart-preset-btn bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 p-2 rounded text-[10px] font-medium transition-all" data-width="100" data-height="700">Staggered Image 100×700</button>
+                                    <button type="button" class="smart-preset-btn bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 p-2 rounded text-[10px] font-medium transition-all" data-width="900" data-height="600">Right Side Image 900×600</button>
+                                </div>
+                                <div class="text-right mt-1">
+                                    <button id="smart-toggle-manual" data-tooltip="Manually set a custom width and height for the output" class="text-[10px] text-blue-500 hover:underline font-bold">Switch to Custom Size</button>
+                                </div>
+                            </div>
+                            <hr class="border-slate-100 my-4">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <label class="block text-xs font-semibold text-slate-500">QUALITY</label>
+                                        <span id="smart-q-val" class="text-xs font-bold text-blue-600">90%</span>
+                                    </div>
+                                    <input type="range" id="smart-quality" min="0.1" max="1.0" step="0.05" value="0.9" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-2">FORMAT (WebP is best for Web)</label>
+                                    <div class="flex gap-3">
+                                        <label class="flex items-center text-sm cursor-pointer" data-tooltip="Export optimized images as WebP for web-friendly file sizes">
+                                            <input type="radio" name="smart-fmt" value="webp" checked class="text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2 font-bold text-blue-600">WebP</span>
+                                        </label>
+                                        <label class="flex items-center text-sm cursor-pointer" data-tooltip="Export optimized images as JPG for broad compatibility">
+                                            <input type="radio" name="smart-fmt" value="jpeg" class="text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2">JPG</span>
+                                        </label>
+                                        <label class="flex items-center text-sm cursor-pointer" data-tooltip="Export images in the JXL format for modern compression and quality">
+                                            <input type="radio" name="smart-fmt" value="jxl" class="text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2">JXL</span>
+                                        </label>
+                                        <label class="flex items-center text-sm cursor-pointer" data-tooltip="Keep the original format instead of converting to a new file type">
+                                            <input type="radio" name="smart-fmt" value="keep" class="text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2">Original</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row flex-wrap gap-4 mt-6 pt-5 border-t border-slate-100 items-center">
+                                <label class="flex items-center text-sm cursor-pointer text-slate-700 font-medium hover:text-blue-600 transition-colors" data-tooltip="Limit image uploads to 25 files at a time">
+                                    <input type="checkbox" id="smart-limit-25" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mr-2 w-4 h-4 cursor-pointer">
+                                    Limit upload to 25 images
+                                </label>
+                                <label class="flex items-center text-sm cursor-pointer text-slate-700 font-medium hover:text-blue-600 transition-colors" data-tooltip="Add a -min suffix to the output filenames to keep originals clear">
+                                    <input type="checkbox" id="smart-suffix-min" checked class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mr-2 w-4 h-4 cursor-pointer">
+                                    Append "-min" to filename
+                                </label>
+                                <label class="flex items-center text-sm cursor-pointer text-slate-700 font-medium hover:text-blue-600 transition-colors" data-tooltip="Enhance smaller images up to 1920px before exporting">
+                                    <input type="checkbox" id="smart-upscale" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mr-2 w-4 h-4 cursor-pointer">
+                                    Upscale small images to 1920px
+                                </label>
+
+                                <label class="flex items-center gap-2 text-sm font-bold text-orange-600 cursor-pointer bg-orange-50 px-3 py-1 rounded-full border border-orange-200 hover:bg-orange-100 transition-colors" data-tooltip="Keep the original image data without applying compression or optimization">
+                                    <input type="checkbox" id="smart-bypass" class="rounded text-orange-600 focus:ring-orange-500 w-4 h-4 cursor-pointer">
+                                    Bypass Compression (Keep Original Data)
+                                </label>
+                                <label class="flex items-center text-sm cursor-pointer text-slate-700 font-medium hover:text-blue-600 transition-colors" data-tooltip="Export several width variants from the same source image">
+                                    <input type="checkbox" id="smart-multi-size" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 mr-2 w-4 h-4 cursor-pointer">
+                                    Export multiple widths
+                                </label>
+                            </div>
+                            <div id="smart-sizes-row" class="mt-3 flex items-center gap-3" data-tooltip="List the output sizes in pixels, separated by commas">
+                                <span class="text-xs font-semibold text-slate-500 whitespace-nowrap shrink-0">WIDTHS (px):</span>
+                                <input type="text" id="smart-sizes" value="1920, 1280, 800, 400" class="flex-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" data-tooltip="Set the export widths for multiple size outputs">
+                                <span class="text-[10px] text-slate-400 shrink-0">comma-separated</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="smart-actions" class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center hidden sticky-action-bar">
+                        <div class="text-xs text-slate-500"><span id="smart-processed-count">0</span> processed</div>
+                        <div class="flex gap-3">
+                            <button id="smart-reset" data-tooltip="Clear all processed images and reset the current batch" class="secondary-btn">Clear All</button>
+                            <button id="smart-download-all" data-tooltip="Download all processed images as a zip file" class="primary-btn flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                Download All as ZIP
+                            </button>
+                        </div>
+                    </div>
+                    <div id="smart-results" class="bg-slate-100 p-6 min-h-[200px] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div id="smart-empty-state" class="col-span-full flex flex-col items-center justify-center text-slate-400 py-12">
+                            <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            <p class="text-sm">Processed images will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== RENAMER ==================== -->
+        <div id="tool-renamer" class="tool-section hidden">
+            <div class="max-w-3xl mx-auto mt-8 space-y-4">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Bulk File Renamer</h2>
+                    <p class="text-slate-500 mb-6">Rename files in bulk using prefix, suffix, find/replace, and sequential numbering.</p>
+                    <div id="renamer-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-10 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
+                        <p class="text-slate-500 font-medium">Drag & drop files here, or click to browse</p>
+                        <p id="renamer-file-count" class="text-blue-600 font-bold text-sm mt-1 hidden"></p>
+                    </div>
+                </div>
+
+                <div id="renamer-options" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+                    <h3 class="text-lg font-bold text-slate-800 mb-5">Rename Rules</h3>
+                    <div class="space-y-5">
+                        <label class="flex items-center gap-3 text-sm font-medium text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="renamer-strip-min" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+                            Strip <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono text-slate-600">-min</code> suffix from filenames
+                        </label>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">ADD PREFIX</label>
+                                <input type="text" id="renamer-prefix" placeholder="e.g. 2024_" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">ADD SUFFIX (before extension)</label>
+                                <input type="text" id="renamer-suffix" placeholder="e.g. _final" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">FIND (in filename)</label>
+                                <input type="text" id="renamer-find" placeholder="text to find" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">REPLACE WITH</label>
+                                <input type="text" id="renamer-replace" placeholder="replacement (leave blank to delete)" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <label class="flex items-center gap-2 text-sm font-medium text-slate-700 cursor-pointer">
+                                <input type="checkbox" id="renamer-sequential" class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500">
+                                Add sequential number
+                            </label>
+                            <div class="flex items-center gap-2 text-xs text-slate-500">
+                                <span>start at</span>
+                                <input type="number" id="renamer-seq-start" value="1" min="0" class="w-16 bg-slate-50 border border-slate-200 rounded p-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                <span>pad to</span>
+                                <input type="number" id="renamer-seq-pad" value="3" min="1" max="6" class="w-14 bg-slate-50 border border-slate-200 rounded p-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                <span>digits</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="renamer-preview-panel" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="text-lg font-bold text-slate-800">Preview</h3>
+                        <button id="renamer-download" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold shadow hover:bg-blue-700 transition-colors">Download ZIP</button>
+                    </div>
+                    <div id="renamer-list" class="text-sm max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-100 rounded-lg"></div>
+                    <p id="renamer-status" class="mt-3 text-slate-500 text-sm"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TYPESCALE ==================== -->
+        <div id="tool-typescale" class="tool-section hidden">
+            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+                <div class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-lg border border-slate-200 h-fit">
+                    <h2 class="text-xl font-bold mb-4">Settings</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <label class="block text-sm font-medium text-slate-700">Target Size (px)</label>
+                                <select id="ts-mode" class="text-[10px] bg-transparent text-blue-600 font-bold cursor-pointer outline-none uppercase tracking-wider">
+                                    <option value="base">Set Base (Body)</option>
+                                    <option value="max">Set Max (Heading)</option>
+                                </select>
+                            </div>
+                            <input type="number" id="ts-base" value="16" class="w-full bg-slate-50 border border-slate-200 rounded p-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Scale Ratio</label>
+                            <select id="ts-scale" class="w-full bg-slate-50 border border-slate-200 rounded p-2">
+                                <option value="1.067">1.067 - Minor Second</option>
+                                <option value="1.125">1.125 - Major Second</option>
+                                <option value="1.200">1.200 - Minor Third</option>
+                                <option value="1.250" selected>1.250 - Major Third</option>
+                                <option value="1.333">1.333 - Perfect Fourth</option>
+                                <option value="1.414">1.414 - Augmented Fourth</option>
+                                <option value="1.500">1.500 - Perfect Fifth</option>
+                                <option value="1.618">1.618 - Golden Ratio</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Font</label>
+                            <select id="ts-font" class="w-full bg-slate-50 border border-slate-200 rounded p-2">
+                                <option value="Inter">Inter</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Oswald">Oswald</option>
+                                <option value="Playfair Display">Playfair Display</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold">CSS Output</h3>
+                            <button id="ts-copy-css" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Copy CSS</button>
+                        </div>
+                        <pre class="bg-slate-800 text-slate-200 p-3 rounded text-xs overflow-x-auto"><code id="ts-css"></code></pre>
+                        <button id="ts-copy-tokens" class="mt-3 w-full text-xs font-bold text-blue-600 border border-blue-200 rounded-lg py-2 hover:bg-blue-50 transition-colors">Copy as W3C Design Tokens</button>
+                    </div>
+                </div>
+                <div class="lg:col-span-8 bg-white p-8 rounded-2xl shadow-lg border border-slate-200 min-h-[500px]">
+                    <h2 class="text-2xl font-bold border-b pb-4 mb-4">Preview</h2>
+                    <div id="ts-preview" class="space-y-6"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PDF TO JPG ==================== -->
+        <div id="tool-pdf" class="tool-section hidden">
+            <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden mt-6">
+                <div class="p-8 border-b border-slate-100">
+                    <h1 class="text-3xl font-bold text-slate-800">PDF to JPG Converter</h1>
+                </div>
+                <div class="p-8">
+                    <div id="pdf-drop" class="border-4 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+                        <input type="file" id="pdf-input" accept="application/pdf" multiple class="hidden">
+                        <p class="text-xl font-semibold text-slate-700">Drag & drop PDF files</p>
+                        <p class="text-slate-400">or click to browse</p>
+                    </div>
+                    <div id="pdf-ui-container" class="hidden mt-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Files to Convert</h2>
+                            <span id="pdf-count" class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-1 rounded">0</span>
+                        </div>
+                        <div id="pdf-list" class="space-y-3 max-h-64 overflow-y-auto pr-2"></div>
+                        <div class="mt-6 text-center">
+                            <button id="pdf-action-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-lg shadow disabled:bg-slate-300">Convert & Download Zip</button>
+                            <div id="pdf-progress" class="hidden mt-5 text-left">
+                                <div class="flex justify-between text-xs text-slate-500 mb-1.5">
+                                    <span id="pdf-progress-label" class="truncate mr-2 font-medium">Processing...</span>
+                                    <span id="pdf-progress-pct" class="font-bold text-blue-600 shrink-0">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                    <div id="pdf-progress-bar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-200" style="width:0%"></div>
+                                </div>
+                            </div>
+                            <p id="pdf-status" class="text-sm text-slate-500 mt-3"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== FAVICON MAKER ==================== -->
+        <div id="tool-favicon" class="tool-section hidden">
+            <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-6 border border-slate-100">
+                <header class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-slate-900">Favicon & App Icon Generator</h1>
+                    <p class="mt-2 text-slate-500">Upload one square logo. Get all the exact sizes your programmers need.</p>
+                </header>
+                <div id="fav-drop" class="border-4 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                    <input type="file" id="fav-input" accept="image/png, image/jpeg, image/svg+xml" class="hidden">
+                    <div class="bg-white p-4 rounded-full shadow-sm inline-block mb-4 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    </div>
+                    <p class="text-xl font-semibold text-slate-700">Drop a high-res square logo here</p>
+                    <p class="text-slate-400 text-sm mt-1">Recommended: 512x512 PNG</p>
+                </div>
+                <div id="fav-ui" class="hidden mt-8 text-center">
+                    <div class="flex justify-center mb-6">
+                        <img id="fav-preview" class="w-24 h-24 rounded-lg shadow-md border border-slate-200 object-cover">
+                    </div>
+                    <div class="mb-5 text-left">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">APP NAME (for site.webmanifest)</label>
+                        <input type="text" id="fav-app-name" placeholder="My App" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8 text-xs text-slate-500 text-left bg-slate-50 p-4 rounded-lg border border-slate-100">
+                        <div class="font-semibold text-green-600">✓ favicon.ico</div>
+                        <div>✓ favicon-16x16.png</div>
+                        <div>✓ favicon-32x32.png</div>
+                        <div>✓ apple-touch-icon-57x57...</div>
+                        <div>✓ apple-touch-icon-72x72...</div>
+                        <div>✓ apple-touch-icon-114x114...</div>
+                        <div>✓ apple-touch-icon-144x144...</div>
+                        <div class="font-semibold text-blue-600">✓ icon-192x192.png <span class="text-[9px] text-blue-400 font-bold uppercase">PWA</span></div>
+                        <div class="font-semibold text-blue-600">✓ icon-512x512.png <span class="text-[9px] text-blue-400 font-bold uppercase">PWA</span></div>
+                        <div class="font-semibold text-green-600">✓ site.webmanifest</div>
+                    </div>
+                    <button id="fav-generate-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-lg shadow-lg transition-transform active:scale-95">
+                        Generate & Download ZIP
+                    </button>
+                    <p id="fav-status" class="text-sm text-slate-500 mt-3 font-medium"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== SVG OPTIMIZER ==================== -->
+        <div id="tool-svg" class="tool-section hidden">
+            <div class="max-w-3xl mx-auto mt-8">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">SVG Optimizer</h1>
+                        <p class="mt-2 text-slate-500">Clean up Figma & Illustrator SVGs. Strip editor metadata and shrink file size.</p>
+                    </header>
+                    <div id="svg-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group">
+                        <input type="file" id="svg-input" accept=".svg,image/svg+xml" multiple class="hidden">
+                        <svg class="w-10 h-10 text-slate-300 group-hover:text-blue-400 mb-3 mx-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                        <p class="text-sm font-medium text-slate-600">Drop SVG files here or click to browse</p>
+                        <p class="text-xs text-slate-400 mt-1">Supports multiple files — downloads as ZIP</p>
+                    </div>
+
+                    <div id="svg-results" class="mt-6 hidden">
+                        <div id="svg-list" class="space-y-3 max-h-96 overflow-y-auto"></div>
+                        <div class="mt-5 flex justify-between items-center pt-4 border-t border-slate-100">
+                            <p id="svg-status" class="text-sm text-slate-500 font-medium"></p>
+                            <button id="svg-download-all" class="bg-slate-900 text-white px-6 py-2 rounded-lg font-bold shadow hover:bg-slate-800 transition-colors hidden">Download All as ZIP</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== IMAGE CROPPER ==================== -->
+        <div id="tool-cropper" class="tool-section hidden">
+            <div class="max-w-4xl mx-auto mt-8">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">Image Cropper</h1>
+                        <p class="mt-2 text-slate-500">Drag to select a crop area. Lock to common aspect ratios.</p>
+                    </header>
+                    <div id="crop-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group">
+                        <input type="file" id="crop-input" accept="image/*" class="hidden">
+                        <svg class="w-10 h-10 text-slate-300 group-hover:text-blue-400 mb-3 mx-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <p class="text-sm font-medium text-slate-600">Drop an image here or click to browse</p>
+                        <p class="text-xs text-slate-400 mt-1">JPG, PNG, WebP</p>
+                    </div>
+
+                    <div id="crop-editor" class="hidden">
+                        <div class="flex flex-wrap gap-2 mb-4 mt-6 items-center">
+                            <span class="text-xs font-semibold text-slate-500 mr-1">RATIO:</span>
+                            <button class="crop-ratio-btn px-3 py-1 text-xs font-bold border rounded bg-blue-600 text-white border-blue-600" data-ratio="free">Free</button>
+                            <button class="crop-ratio-btn px-3 py-1 text-xs font-bold border rounded bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" data-ratio="1:1">1 : 1</button>
+                            <button class="crop-ratio-btn px-3 py-1 text-xs font-bold border rounded bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" data-ratio="16:9">16 : 9</button>
+                            <button class="crop-ratio-btn px-3 py-1 text-xs font-bold border rounded bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" data-ratio="4:3">4 : 3</button>
+                            <button class="crop-ratio-btn px-3 py-1 text-xs font-bold border rounded bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" data-ratio="3:2">3 : 2</button>
+                            <button class="crop-ratio-btn px-3 py-1 text-xs font-bold border rounded bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" data-ratio="9:16">9 : 16</button>
+                            <div class="ml-auto flex items-center gap-3">
+                                <span id="crop-dims" class="text-xs font-mono font-bold text-blue-600"></span>
+                                <button id="crop-reset-selection" class="text-xs font-bold text-slate-500 hover:text-blue-600 border border-slate-200 rounded px-2.5 py-1 transition-colors">Select All</button>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center p-2">
+                            <canvas id="crop-canvas" class="max-w-full cursor-crosshair rounded" style="display:block;"></canvas>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-5">
+                            <button id="crop-new-image" class="text-sm text-slate-500 hover:text-slate-800 font-medium transition-colors">← Load New Image</button>
+                            <span class="text-[10px] text-slate-400 hidden sm:block">Arrow keys nudge 1px &bull; Shift+Arrow = 10px</span>
+                            <button id="crop-download" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-8 rounded-lg shadow transition-transform active:scale-95">Download Crop</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== COLOR PALETTE ==================== -->
+        <div id="tool-palette" class="tool-section hidden">
+            <div class="max-w-3xl mx-auto mt-8">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">Color Palette Extractor</h1>
+                        <p class="mt-2 text-slate-500">Extract dominant colors from any image as hex swatches and CSS variables.</p>
+                    </header>
+                    <div id="palette-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group">
+                        <input type="file" id="palette-input" accept="image/*" class="hidden">
+                        <svg class="w-10 h-10 text-slate-300 group-hover:text-blue-400 mb-3 mx-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                        <p class="text-sm font-medium text-slate-600">Drop an image here or click to browse</p>
+                        <p class="text-xs text-slate-400 mt-1">JPG, PNG, WebP</p>
+                    </div>
+                    <div class="flex items-center gap-3 mt-4">
+                        <label class="text-xs font-semibold text-slate-500 whitespace-nowrap">COLORS:</label>
+                        <input type="range" id="palette-count" min="4" max="12" step="1" value="8" class="flex-1">
+                        <span id="palette-count-label" class="text-sm font-bold text-blue-600 w-4 text-right">8</span>
+                    </div>
+
+                    <div id="palette-results" class="mt-8 hidden">
+                        <div id="palette-swatches" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6"></div>
+                        <div class="bg-slate-800 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">CSS Variables</span>
+                                <button id="palette-copy-css" class="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors">Copy CSS</button>
+                            </div>
+                            <pre class="text-slate-200 text-xs overflow-x-auto"><code id="palette-css"></code></pre>
+                        </div>
+                        <div class="mt-5 text-center">
+                            <button id="palette-new-image" class="text-sm text-slate-500 hover:text-blue-600 font-medium transition-colors">← Extract from another image</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CODE FORMATTER ==================== -->
+        <div id="tool-formatter" class="tool-section hidden">
+            <div class="max-w-5xl mx-auto mt-8">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">Code Formatter</h1>
+                        <p class="mt-2 text-slate-500">Pretty-print or minify JSON, CSS, and HTML. Press Ctrl+Enter to format.</p>
+                    </header>
+
+                    <div class="flex flex-wrap gap-2 mb-6 items-center">
+                        <button class="fmt-tab-btn px-5 py-2 text-sm font-bold border rounded-lg bg-blue-600 text-white border-blue-600" data-fmt="json">JSON</button>
+                        <button class="fmt-tab-btn px-5 py-2 text-sm font-bold border rounded-lg bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" data-fmt="css">CSS</button>
+                        <button class="fmt-tab-btn px-5 py-2 text-sm font-bold border rounded-lg bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100" data-fmt="html">HTML</button>
+                        <div class="ml-auto flex flex-wrap gap-2">
+                            <button id="fmt-format" class="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow">Format</button>
+                            <button id="fmt-minify" class="px-4 py-2 text-sm font-bold bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition-colors shadow">Minify</button>
+                            <button id="fmt-copy" class="px-4 py-2 text-sm font-bold border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">Copy Output</button>
+                            <button id="fmt-clear" class="px-4 py-2 text-sm font-bold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">Clear</button>
+                        </div>
+                    </div>
+
+                    <p id="fmt-error" class="text-sm text-red-500 font-medium mb-3 hidden"></p>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Input</label>
+                            <textarea id="fmt-input" rows="22" placeholder="Paste JSON here…" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Output</label>
+                            <pre class="w-full bg-slate-800 text-slate-200 rounded-xl p-4 text-sm font-mono min-h-[528px] overflow-auto whitespace-pre-wrap break-words"><code id="fmt-output"></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== BASE64 ==================== -->
+        <div id="tool-base64" class="tool-section hidden">
+            <div class="max-w-4xl mx-auto mt-8">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">Base64 Encoder / Decoder</h1>
+                        <p class="mt-2 text-slate-500">Encode text or files to Base64, or decode Base64 back to text or a file.</p>
+                    </header>
+
+                    <div class="flex gap-2 mb-6">
+                        <button id="b64-tab-encode" data-tab="encode" class="px-5 py-2 text-sm font-bold border rounded-lg bg-blue-600 text-white border-blue-600">Encode</button>
+                        <button id="b64-tab-decode" data-tab="decode" class="px-5 py-2 text-sm font-bold border rounded-lg bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100">Decode</button>
+                    </div>
+
+                    <!-- Encode panel -->
+                    <div id="b64-encode-panel">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Text Input</label>
+                                <textarea id="b64-encode-input" rows="10" placeholder="Type or paste text here… (Ctrl+Enter to encode)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Base64 Output</label>
+                                <textarea id="b64-encode-output" rows="10" readonly placeholder="Base64 will appear here…" class="w-full bg-slate-800 text-slate-200 rounded-xl p-4 text-sm font-mono resize-none focus:outline-none"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-5">
+                            <button id="b64-encode-btn" class="px-5 py-2 text-sm font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow transition-colors">Encode Text</button>
+                            <button id="b64-encode-copy" class="px-5 py-2 text-sm font-bold border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">Copy</button>
+                            <button id="b64-encode-clear" class="px-5 py-2 text-sm font-bold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">Clear</button>
+                        </div>
+                        <div class="border-t border-slate-100 pt-5">
+                            <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Or Encode a File (outputs data URL)</label>
+                            <div id="b64-file-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
+                                <input type="file" id="b64-file-input" class="hidden">
+                                <p class="text-sm font-medium text-slate-600">Drop any file here or click to browse</p>
+                                <p class="text-xs text-slate-400 mt-1">Output will be a Base64 data URL</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decode panel -->
+                    <div id="b64-decode-panel" class="hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Base64 Input</label>
+                                <textarea id="b64-decode-input" rows="12" placeholder="Paste Base64 or data URL here… (Ctrl+Enter to decode)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Decoded Output</label>
+                                <textarea id="b64-decode-output" rows="12" readonly placeholder="Decoded text will appear here…" class="w-full bg-slate-800 text-slate-200 rounded-xl p-4 text-sm font-mono resize-none focus:outline-none"></textarea>
+                            </div>
+                        </div>
+                        <p id="b64-decode-error" class="text-sm text-red-500 font-medium mb-3 hidden"></p>
+                        <div class="flex flex-wrap gap-2">
+                            <button id="b64-decode-btn" class="px-5 py-2 text-sm font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow transition-colors">Decode</button>
+                            <button id="b64-decode-copy" class="px-5 py-2 text-sm font-bold border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 transition-colors">Copy Text</button>
+                            <button id="b64-decode-download" class="px-5 py-2 text-sm font-bold bg-green-600 text-white rounded-lg hover:bg-green-700 shadow transition-colors hidden">Download File</button>
+                            <button id="b64-decode-clear" class="px-5 py-2 text-sm font-bold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CSS BUILDER ==================== -->
+        <div id="tool-cssbuilder" class="tool-section hidden">
+            <div class="max-w-4xl mx-auto mt-8">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">CSS Builder</h1>
+                        <p class="mt-2 text-slate-500">Visually build box shadows and gradients. Copy the CSS when done.</p>
+                    </header>
+
+                    <div class="flex gap-2 mb-8">
+                        <button id="cssb-tab-shadow" data-tab="shadow" class="px-5 py-2 text-sm font-bold border rounded-lg bg-blue-600 text-white border-blue-600">Box Shadow</button>
+                        <button id="cssb-tab-gradient" data-tab="gradient" class="px-5 py-2 text-sm font-bold border rounded-lg bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100">Gradient</button>
+                    </div>
+
+                    <!-- Box Shadow panel -->
+                    <div id="cssb-shadow-panel">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Shadow Layers</h3>
+                                    <button id="cssb-shadow-add" class="text-xs font-bold text-blue-600 border border-blue-200 rounded-lg px-3 py-1.5 hover:bg-blue-50 transition-colors">+ Add Layer</button>
+                                </div>
+                                <div id="cssb-shadow-layers" class="space-y-4 max-h-[480px] overflow-y-auto pr-1"></div>
+                            </div>
+                            <div class="flex flex-col gap-4">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">Preview</h3>
+                                    <div class="bg-slate-100 rounded-xl flex items-center justify-center h-52">
+                                        <div id="cssb-shadow-preview" class="w-28 h-28 bg-white rounded-xl"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">CSS Output</h3>
+                                        <button id="cssb-shadow-copy" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Copy CSS</button>
+                                    </div>
+                                    <pre class="bg-slate-800 text-slate-200 rounded-xl p-4 text-sm font-mono overflow-x-auto whitespace-pre-wrap break-all"><code id="cssb-shadow-output"></code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gradient panel -->
+                    <div id="cssb-gradient-panel" class="hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-5">
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Type</h3>
+                                    <div class="flex gap-2">
+                                        <button id="cssb-grad-linear" data-type="linear" class="px-4 py-2 text-sm font-bold border rounded-lg bg-blue-600 text-white border-blue-600">Linear</button>
+                                        <button id="cssb-grad-radial" data-type="radial" class="px-4 py-2 text-sm font-bold border rounded-lg bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100">Radial</button>
+                                    </div>
+                                </div>
+                                <div id="cssb-grad-angle-row">
+                                    <div class="flex justify-between mb-1">
+                                        <label class="text-xs font-semibold text-slate-500">Angle</label>
+                                        <span id="cssb-grad-angle-label" class="text-xs font-bold text-blue-600">135°</span>
+                                    </div>
+                                    <input type="range" id="cssb-grad-angle" min="0" max="360" value="135" class="w-full">
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Color Stops</h3>
+                                        <button id="cssb-grad-add-stop" class="text-xs font-bold text-blue-600 border border-blue-200 rounded-lg px-3 py-1 hover:bg-blue-50 transition-colors">+ Stop</button>
+                                    </div>
+                                    <div id="cssb-grad-stops" class="space-y-3"></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-4">
+                                <div>
+                                    <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">Preview</h3>
+                                    <div id="cssb-grad-preview" class="rounded-xl h-52 w-full"></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">CSS Output</h3>
+                                        <button id="cssb-grad-copy" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Copy CSS</button>
+                                    </div>
+                                    <pre class="bg-slate-800 text-slate-200 rounded-xl p-4 text-sm font-mono overflow-x-auto whitespace-pre-wrap break-all"><code id="cssb-grad-output"></code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-16 pb-8 text-center">
+        <p class="text-sm font-semibold text-slate-500">&copy; 2026 Abdulrahman Hasan Saidali</p>
+        <p class="text-xs text-slate-400 mt-1">All rights reserved. Built for creators.</p>
+    </footer>
+
+</body>
+</html>
