@@ -96,20 +96,18 @@ export function initBase64() {
         decodeBlob = null;
 
         try {
-            // Handle data URLs
-            const dataUrlMatch = raw.match(/^data:([^;]+);base64,(.+)$/s);
+            // Handle data URLs, including extra parameters such as ";charset=utf-8"
+            const dataUrlMatch = raw.match(/^data:([^,]*?);base64,(.*)$/s);
             if (dataUrlMatch) {
-                const mime = dataUrlMatch[1];
-                const b64 = dataUrlMatch[2];
-                const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+                const mime = dataUrlMatch[1].split(';')[0].trim() || 'application/octet-stream';
+                const bytes = base64ToBytes(dataUrlMatch[2]);
                 decodeBlob = new Blob([bytes], { type: mime });
                 decodeOutput.value = `[Binary file: ${mime}, ${(bytes.length / 1024).toFixed(1)} KB]\nClick "Download File" to save it.`;
                 decodeDownloadBtn.classList.remove('hidden');
                 return;
             }
 
-            const normalized = raw.replace(/\s+/g, '');
-            const bytes = Uint8Array.from(atob(normalized), c => c.charCodeAt(0));
+            const bytes = base64ToBytes(raw);
             const text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
             decodeOutput.value = text;
         } catch (e) {
@@ -136,8 +134,28 @@ export function initBase64() {
 
     decodeDownloadBtn.addEventListener('click', async () => {
         if (!decodeBlob) return;
-        await downloadBlob(decodeBlob, `decoded_file.${decodeBlob.type.split('/')[1] || 'bin'}`);
+        await downloadBlob(decodeBlob, `decoded_file.${extensionFor(decodeBlob.type)}`);
     });
+
+    // Accepts standard and URL-safe Base64 (- and _), with or without padding/whitespace
+    function base64ToBytes(b64) {
+        let s = b64.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+        if (s.length % 4) s += '='.repeat(4 - (s.length % 4));
+        return Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    }
+
+    const EXTENSIONS = {
+        'image/jpeg': 'jpg', 'image/svg+xml': 'svg', 'image/x-icon': 'ico', 'image/vnd.microsoft.icon': 'ico',
+        'text/plain': 'txt', 'text/javascript': 'js', 'application/javascript': 'js',
+        'application/octet-stream': 'bin', 'audio/mpeg': 'mp3',
+    };
+
+    function extensionFor(mime) {
+        if (EXTENSIONS[mime]) return EXTENSIONS[mime];
+        // image/png → png, application/ld+json → json; give up on vendor types
+        const sub = (mime.split('/')[1] || '').split('+').pop();
+        return /^[a-z0-9]+$/i.test(sub) ? sub.toLowerCase() : 'bin';
+    }
 
     decodeInput.addEventListener('keydown', e => {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); decodeBtn.click(); }

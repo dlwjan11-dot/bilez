@@ -54,7 +54,7 @@ test.describe('Base64', () => {
         await page.press('#b64-decode-input', 'Control+Enter');
         await expect(page.locator('#b64-decode-download')).toBeVisible();
         await page.click('#b64-decode-download');
-        const saved = await expectSaved(ctx.out('decoded_file.jpeg'));
+        const saved = await expectSaved(ctx.out('decoded_file.jpg'));
         expect(fs.readFileSync(saved).equals(fs.readFileSync(fixture('small.jpg')))).toBe(true);
 
         await page.fill('#b64-decode-input', 'data:image/svg+xml;base64,' + fs.readFileSync(fixture('icon-bloated.svg')).toString('base64'));
