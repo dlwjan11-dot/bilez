@@ -117,6 +117,12 @@ export function initSmartResizer() {
 
     document.querySelectorAll('input[name="smart-fmt"]').forEach(r => r.addEventListener('change', debouncedReprocessAll));
 
+    if (multiSizeCheckbox && multiSizesRow) {
+        const syncSizesRow = () => multiSizesRow.classList.toggle('hidden', !multiSizeCheckbox.checked);
+        multiSizeCheckbox.addEventListener('change', syncSizesRow);
+        syncSizesRow();
+    }
+
     if (suffixCheckbox) suffixCheckbox.addEventListener('change', debouncedReprocessAll);
     if (bypassCheckbox) bypassCheckbox.addEventListener('change', debouncedReprocessAll);
     if (upscaleCheckbox) upscaleCheckbox.addEventListener('change', debouncedReprocessAll);
@@ -237,11 +243,14 @@ export function initSmartResizer() {
         }
     }
 
+    const imagesLoaded = (n) => `${n} image${n === 1 ? '' : 's'} loaded`;
+
     function isRasterImage(file) {
         const name = (file && file.name || '').toLowerCase();
         const type = (file && file.type || '').toLowerCase();
-        const supportedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic', 'image/heif', 'image/bmp', 'image/jxl'];
-        const extensions = /\.(jpe?g|png|webp|avif|heic|heif|bmp|jxl)$/i;
+        // Only formats Chromium can decode for the preview (no HEIC/HEIF or JXL)
+        const supportedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/bmp'];
+        const extensions = /\.(jpe?g|png|webp|avif|bmp)$/i;
 
         return !!file && !/\.svg$/i.test(name) && (supportedTypes.includes(type) || extensions.test(name));
     }
@@ -251,7 +260,7 @@ export function initSmartResizer() {
 
         let newFiles = Array.from(fileList).filter(file => {
             if (!isRasterImage(file)) {
-                showToast(`Skipped ${file.name || 'file'}: only raster image formats are supported for resizing.`, 'warning');
+                showToast(`Skipped ${file.name || 'file'}: supported formats are JPG, PNG, WebP, AVIF and BMP.`, 'warning');
                 return false;
             }
             return true;
@@ -275,7 +284,7 @@ export function initSmartResizer() {
 
         emptyState.classList.add('hidden');
         actionBar.classList.remove('hidden');
-        counter.textContent = `${files.length} images loaded`;
+        counter.textContent = imagesLoaded(files.length);
         counter.classList.remove('hidden');
 
         newFiles.forEach((file) => {
@@ -342,7 +351,7 @@ export function initSmartResizer() {
                 actionBar.classList.add('hidden');
                 counter.classList.add('hidden');
             } else {
-                counter.textContent = `${remaining} images loaded`;
+                counter.textContent = imagesLoaded(remaining);
                 const countEl = document.getElementById('smart-processed-count');
                 if (countEl) countEl.textContent = processedFiles.filter(i => !i.removed && i.compressedBlob).length;
             }
@@ -454,7 +463,7 @@ export function initSmartResizer() {
                 mime = 'image/jpeg'; ext = '.jpg';
             } else if (fmt === 'keep') {
                 const allowedMime = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
-                mime = ['image/png', 'image/jpeg', 'image/webp', 'image/avif', 'image/heic', 'image/heif', 'image/bmp'].includes(allowedMime)
+                mime = ['image/png', 'image/jpeg', 'image/webp', 'image/avif', 'image/bmp'].includes(allowedMime)
                     ? allowedMime
                     : 'image/jpeg';
                 ext = mime === 'image/png' ? '.png' : mime === 'image/webp' ? '.webp' : '.jpg';
@@ -567,6 +576,10 @@ export function initSmartResizer() {
         } catch (e) {
             if (processGens[idx] !== gen) return;
             console.error("Processing Error:", e);
+            if (!item.errorShown) { // once per image, not again on every settings change
+                item.errorShown = true;
+                showToast(`Could not read ${file.name}: the file is damaged or not a supported image.`, 'error');
+            }
             const dimsEl = document.getElementById(`smart-dims-${idx}`);
             if (dimsEl) { dimsEl.textContent = "Error"; dimsEl.classList.add('text-red-500'); }
             const loaderEl = document.getElementById(`smart-loader-${idx}`);

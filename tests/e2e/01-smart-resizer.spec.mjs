@@ -216,6 +216,9 @@ test.describe('Smart Resizer', () => {
         await expect(page.locator('#toast-container')).toContainText('Skipped notes.txt');
         await dropFiles(page, '#smart-drop', ['icon-bloated.svg']);
         await expect(page.locator('#toast-container')).toContainText('Skipped icon-bloated.svg');
+        await dropFiles(page, '#smart-drop', [{ file: 'small.jpg', as: 'phone.heic' }]);
+        await expect(page.locator('#toast-container'), 'HEIC cannot be decoded, so it is rejected up front').toContainText('Skipped phone.heic');
+        await expect(page.locator('#smart-empty-state')).toBeVisible();
 
         await dropFiles(page, '#smart-drop', ['fake-image.jpg', 'empty.png']);
         await settle(page);
