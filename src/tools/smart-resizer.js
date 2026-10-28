@@ -181,6 +181,10 @@ export function initSmartResizer() {
 
             dlAllBtn.textContent = 'Zipping…';
             try {
+                if (!zipFiles.length) {
+                    showToast('Nothing to download: every resize failed.', 'error');
+                    return;
+                }
                 await downloadZip(zipFiles, 'processed_images_multi.zip');
             } catch (e) {
                 console.error('Multi-size ZIP failed:', e);
@@ -197,6 +201,10 @@ export function initSmartResizer() {
                 for (const item of processedFiles) {
                     if (!item.compressedBlob || item.removed) continue;
                     zipFiles.push({ name: item.name, data: await item.compressedBlob.arrayBuffer() });
+                }
+                if (!zipFiles.length) {
+                    showToast('Nothing to download yet: no image has been processed successfully.', 'warning');
+                    return;
                 }
                 await downloadZip(zipFiles, 'processed_images.zip');
             } catch (e) {

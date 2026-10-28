@@ -226,6 +226,7 @@ test.describe('Smart Resizer', () => {
         await page.click('#smart-download-all');
         await page.waitForTimeout(1500);
         expect.soft(fs.existsSync(ctx.out('processed_images.zip')), 'should not save an empty ZIP when nothing processed').toBe(false);
+        await expect(page.locator('#toast-container')).toContainText('Nothing to download');
         await shot(page, '01-smart-resizer-errors');
     });
 });
