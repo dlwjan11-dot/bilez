@@ -34,12 +34,12 @@
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
 
     <nav class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-3 py-2.5 md:py-3">
-                <div class="flex items-center gap-3 md:gap-4 w-full md:w-auto justify-between md:justify-start">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col min-[1100px]:flex-row items-center justify-between gap-3 py-2.5 md:py-3">
+                <div class="flex items-center gap-3 md:gap-4 w-full min-[1100px]:w-auto justify-between min-[1100px]:justify-start">
                     <div class="flex items-center gap-2.5">
                         <span class="brand-mark">A</span>
-                        <div class="font-bold text-base md:text-xl tracking-wider text-blue-400">ABDUL TOOLS</div>
+                        <div class="font-bold text-base md:text-xl tracking-wider text-blue-400 whitespace-nowrap">ABDUL TOOLS</div>
                     </div>
                     <button id="dark-toggle" data-tooltip="Switch between light and dark mode" title="Switch between light and dark mode" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
                         <svg id="dark-icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -47,19 +47,19 @@
                     </button>
                 </div>
 
-                <div class="nav-tabs-wrap w-full md:w-auto">
-                    <div class="flex items-center gap-1 md:gap-1.5 w-full md:w-auto overflow-x-auto no-scrollbar" id="nav-tabs">
-                        <button data-tab="smart" data-tooltip="Open Smart Resize to optimize, compress, and resize your images" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Smart Resize</button>
-                        <button data-tab="renamer" data-tooltip="Open the bulk file renamer to rename many files at once" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Renamer</button>
-                        <button data-tab="typescale" data-tooltip="Open Typescale to preview font size and spacing combinations" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Typescale</button>
-                        <button data-tab="pdf" data-tooltip="Convert PDF files into JPG images" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">PDF to JPG</button>
-                        <button data-tab="favicon" data-tooltip="Generate website favicons and app icons" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Favicon</button>
-                        <button data-tab="svg" data-tooltip="Optimize and clean up SVG files for smaller, cleaner output" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">SVG</button>
-                        <button data-tab="cropper" data-tooltip="Crop images with custom dimensions and output settings" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Cropper</button>
-                        <button data-tab="palette" data-tooltip="Extract color palettes from images and screenshots" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Palette</button>
-                        <button data-tab="formatter" data-tooltip="Format code and clean up text quickly" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Formatter</button>
-                        <button data-tab="base64" data-tooltip="Encode or decode Base64 text" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Base64</button>
-                        <button data-tab="cssbuilder" data-tooltip="Build CSS snippets and utility styles faster" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">CSS Builder</button>
+                <div class="nav-tabs-wrap w-full min-[1100px]:w-auto">
+                    <div class="flex items-center gap-1 md:gap-1.5 w-full min-[1100px]:w-auto overflow-x-auto no-scrollbar" id="nav-tabs">
+                        <button data-tab="smart" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Smart Resize</button>
+                        <button data-tab="renamer" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Renamer</button>
+                        <button data-tab="typescale" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Typescale</button>
+                        <button data-tab="pdf" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">PDF to JPG</button>
+                        <button data-tab="favicon" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Favicon</button>
+                        <button data-tab="svg" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">SVG</button>
+                        <button data-tab="cropper" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Cropper</button>
+                        <button data-tab="palette" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Palette</button>
+                        <button data-tab="formatter" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Formatter</button>
+                        <button data-tab="base64" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Base64</button>
+                        <button data-tab="cssbuilder" class="tab-btn px-3 py-2.5 md:px-4 md:py-3 text-[11px] md:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">CSS Builder</button>
                     </div>
                 </div>
             </div>
@@ -72,15 +72,8 @@
         <div id="tool-smart" class="tool-section">
             <div class="max-w-6xl mx-auto">
                 <header class="tool-header text-center mb-8">
-                    <div class="inline-flex items-center justify-center gap-3 flex-wrap rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-700 mb-4">
-                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        Image workflow
-                    </div>
-                    <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Smart Image Processor</h1>
+                    <h1 class="text-3xl font-bold text-slate-900">Smart Image Processor</h1>
                     <p class="mt-2 text-slate-500">Resize, compress, and export your images without the usual trial and error.</p>
-                    <div class="mt-4 flex justify-center">
-                        <span class="status-pill status-ready">Ready</span>
-                    </div>
                 </header>
                 <div class="bg-white rounded-xl shadow-xl overflow-hidden">
                     <div class="p-6 md:p-8 grid lg:grid-cols-12 gap-8 border-b border-slate-100">
@@ -104,7 +97,7 @@
                                     <button class="smart-mode-btn bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 p-2 rounded text-xs font-medium border transition-all" data-mode="portrait" data-tooltip="Resize images for tall portrait layouts">Portrait</button>
                                     <button class="smart-mode-btn bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 p-2 rounded text-xs font-medium border transition-all" data-mode="none" data-tooltip="Keep the original dimensions and skip resizing">No Resize</button>
                                 </div>
-                                <div id="smart-manual-inputs" class="grid grid-cols-2 gap-3 opacity-50 pointer-events-none transition-opacity">
+                                <div id="smart-manual-inputs" class="grid grid-cols-2 gap-3 opacity-60 transition-opacity">
                                     <div class="relative">
                                         <input type="number" id="smart-w" placeholder="Width" class="w-full bg-slate-50 border border-slate-200 rounded p-2 text-sm pl-2">
                                         <span class="absolute right-2 top-2 text-xs text-slate-400">px</span>
@@ -114,7 +107,7 @@
                                         <span class="absolute right-2 top-2 text-xs text-slate-400">px</span>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 opacity-50 pointer-events-none transition-opacity" id="smart-preset-row">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 opacity-60 transition-opacity" id="smart-preset-row">
                                     <button type="button" class="smart-preset-btn bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 p-2 rounded text-[10px] font-medium transition-all" data-width="400" data-height="300">Callouts 400×300</button>
                                     <button type="button" class="smart-preset-btn bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 p-2 rounded text-[10px] font-medium transition-all" data-width="1920" data-height="600">Subpage Banner 1920×600</button>
                                     <button type="button" class="smart-preset-btn bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 p-2 rounded text-[10px] font-medium transition-all" data-width="100" data-height="700">Staggered Image 100×700</button>
@@ -203,13 +196,17 @@
 
         <!-- ==================== RENAMER ==================== -->
         <div id="tool-renamer" class="tool-section hidden">
-            <div class="max-w-3xl mx-auto mt-8 space-y-4">
+            <div class="max-w-3xl mx-auto space-y-4">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Bulk File Renamer</h2>
-                    <p class="text-slate-500 mb-6">Rename files in bulk using prefix, suffix, find/replace, and sequential numbering.</p>
-                    <div id="renamer-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-10 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
-                        <p class="text-slate-500 font-medium">Drag & drop files here, or click to browse</p>
-                        <p id="renamer-file-count" class="text-blue-600 font-bold text-sm mt-1 hidden"></p>
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">Bulk File Renamer</h1>
+                        <p class="mt-2 text-slate-500">Rename files in bulk using prefix, suffix, find/replace, and sequential numbering.</p>
+                    </header>
+                    <div id="renamer-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group">
+                        <svg class="w-10 h-10 text-slate-300 group-hover:text-blue-400 mb-3 mx-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        <p class="text-sm font-medium text-slate-600">Drop files here or click to browse</p>
+                        <p class="text-xs text-slate-400 mt-1">Any file type — downloads as ZIP</p>
+                        <p id="renamer-file-count" class="text-blue-600 font-bold text-sm mt-2 hidden"></p>
                     </div>
                 </div>
 
@@ -275,14 +272,18 @@
 
         <!-- ==================== TYPESCALE ==================== -->
         <div id="tool-typescale" class="tool-section hidden">
-            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-slate-900">Typescale</h1>
+                <p class="mt-2 text-slate-500">Build a modular type scale from one size and a ratio, then copy it as CSS or design tokens.</p>
+            </header>
+            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-lg border border-slate-200 h-fit">
                     <h2 class="text-xl font-bold mb-4">Settings</h2>
                     <div class="space-y-4">
                         <div>
-                            <div class="flex justify-between items-end mb-1">
-                                <label class="block text-sm font-medium text-slate-700">Target Size (px)</label>
-                                <select id="ts-mode" class="text-[10px] bg-transparent text-blue-600 font-bold cursor-pointer outline-none uppercase tracking-wider">
+                            <div class="flex justify-between items-center gap-2 mb-1">
+                                <label class="block text-sm font-medium text-slate-700 whitespace-nowrap">Target Size (px)</label>
+                                <select id="ts-mode" class="inline-select text-[10px] text-blue-600 font-bold cursor-pointer uppercase tracking-wider">
                                     <option value="base">Set Base (Body)</option>
                                     <option value="max">Set Max (Heading)</option>
                                 </select>
@@ -318,7 +319,7 @@
                             <h3 class="font-bold">CSS Output</h3>
                             <button id="ts-copy-css" class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">Copy CSS</button>
                         </div>
-                        <pre class="bg-slate-800 text-slate-200 p-3 rounded text-xs overflow-x-auto"><code id="ts-css"></code></pre>
+                        <pre class="bg-slate-800 text-slate-200 p-3 rounded-lg text-xs whitespace-pre-wrap break-words"><code id="ts-css"></code></pre>
                         <button id="ts-copy-tokens" class="mt-3 w-full text-xs font-bold text-blue-600 border border-blue-200 rounded-lg py-2 hover:bg-blue-50 transition-colors">Copy as W3C Design Tokens</button>
                     </div>
                 </div>
@@ -331,15 +332,17 @@
 
         <!-- ==================== PDF TO JPG ==================== -->
         <div id="tool-pdf" class="tool-section hidden">
-            <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden mt-6">
-                <div class="p-8 border-b border-slate-100">
-                    <h1 class="text-3xl font-bold text-slate-800">PDF to JPG Converter</h1>
-                </div>
+            <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="p-8">
-                    <div id="pdf-drop" class="border-4 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+                    <header class="text-center mb-8">
+                        <h1 class="text-3xl font-bold text-slate-900">PDF to JPG Converter</h1>
+                        <p class="mt-2 text-slate-500">Turn every page of one or more PDFs into JPG images.</p>
+                    </header>
+                    <div id="pdf-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group">
                         <input type="file" id="pdf-input" accept="application/pdf" multiple class="hidden">
-                        <p class="text-xl font-semibold text-slate-700">Drag & drop PDF files</p>
-                        <p class="text-slate-400">or click to browse</p>
+                        <svg class="w-10 h-10 text-slate-300 group-hover:text-blue-400 mb-3 mx-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        <p class="text-sm font-medium text-slate-600">Drop PDF files here or click to browse</p>
+                        <p class="text-xs text-slate-400 mt-1">Supports multiple files — downloads as ZIP</p>
                     </div>
                     <div id="pdf-ui-container" class="hidden mt-8">
                         <div class="flex justify-between items-center mb-4">
@@ -370,18 +373,16 @@
 
         <!-- ==================== FAVICON MAKER ==================== -->
         <div id="tool-favicon" class="tool-section hidden">
-            <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8 mt-6 border border-slate-100">
+            <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
                 <header class="text-center mb-8">
                     <h1 class="text-3xl font-bold text-slate-900">Favicon & App Icon Generator</h1>
                     <p class="mt-2 text-slate-500">Upload one square logo. Get all the exact sizes your programmers need.</p>
                 </header>
-                <div id="fav-drop" class="border-4 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
+                <div id="fav-drop" class="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors group">
                     <input type="file" id="fav-input" accept="image/png, image/jpeg, image/svg+xml" class="hidden">
-                    <div class="bg-white p-4 rounded-full shadow-sm inline-block mb-4 group-hover:scale-110 transition-transform">
-                        <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                    </div>
-                    <p class="text-xl font-semibold text-slate-700">Drop a high-res square logo here</p>
-                    <p class="text-slate-400 text-sm mt-1">Recommended: 512x512 PNG</p>
+                    <svg class="w-10 h-10 text-slate-300 group-hover:text-blue-400 mb-3 mx-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <p class="text-sm font-medium text-slate-600">Drop a high-res square logo here or click to browse</p>
+                    <p class="text-xs text-slate-400 mt-1">PNG, JPG or SVG — 512×512 or larger recommended</p>
                 </div>
                 <div id="fav-ui" class="hidden mt-8 text-center">
                     <div class="flex justify-center mb-6">
@@ -414,7 +415,7 @@
 
         <!-- ==================== SVG OPTIMIZER ==================== -->
         <div id="tool-svg" class="tool-section hidden">
-            <div class="max-w-3xl mx-auto mt-8">
+            <div class="max-w-3xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <header class="text-center mb-8">
                         <h1 class="text-3xl font-bold text-slate-900">SVG Optimizer</h1>
@@ -443,7 +444,7 @@
 
         <!-- ==================== IMAGE CROPPER ==================== -->
         <div id="tool-cropper" class="tool-section hidden">
-            <div class="max-w-4xl mx-auto mt-8">
+            <div class="max-w-4xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <header class="text-center mb-8">
                         <h1 class="text-3xl font-bold text-slate-900">Image Cropper</h1>
@@ -487,7 +488,7 @@
 
         <!-- ==================== COLOR PALETTE ==================== -->
         <div id="tool-palette" class="tool-section hidden">
-            <div class="max-w-3xl mx-auto mt-8">
+            <div class="max-w-3xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <header class="text-center mb-8">
                         <h1 class="text-3xl font-bold text-slate-900">Color Palette Extractor</h1>
@@ -524,7 +525,7 @@
 
         <!-- ==================== CODE FORMATTER ==================== -->
         <div id="tool-formatter" class="tool-section hidden">
-            <div class="max-w-5xl mx-auto mt-8">
+            <div class="max-w-5xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <header class="text-center mb-8">
                         <h1 class="text-3xl font-bold text-slate-900">Code Formatter</h1>
@@ -548,11 +549,11 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Input</label>
-                            <textarea id="fmt-input" rows="22" placeholder="Paste JSON here…" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"></textarea>
+                            <textarea id="fmt-input" placeholder="Paste JSON here…" class="block w-full h-[32rem] bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"></textarea>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">Output</label>
-                            <pre class="w-full bg-slate-800 text-slate-200 rounded-xl p-4 text-sm font-mono min-h-[528px] overflow-auto whitespace-pre-wrap break-words"><code id="fmt-output"></code></pre>
+                            <pre class="w-full h-[32rem] bg-slate-800 text-slate-200 rounded-xl p-4 text-sm font-mono overflow-auto whitespace-pre-wrap break-words"><code id="fmt-output"></code></pre>
                         </div>
                     </div>
                 </div>
@@ -561,7 +562,7 @@
 
         <!-- ==================== BASE64 ==================== -->
         <div id="tool-base64" class="tool-section hidden">
-            <div class="max-w-4xl mx-auto mt-8">
+            <div class="max-w-4xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <header class="text-center mb-8">
                         <h1 class="text-3xl font-bold text-slate-900">Base64 Encoder / Decoder</h1>
@@ -626,7 +627,7 @@
 
         <!-- ==================== CSS BUILDER ==================== -->
         <div id="tool-cssbuilder" class="tool-section hidden">
-            <div class="max-w-4xl mx-auto mt-8">
+            <div class="max-w-4xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-xl p-8">
                     <header class="text-center mb-8">
                         <h1 class="text-3xl font-bold text-slate-900">CSS Builder</h1>

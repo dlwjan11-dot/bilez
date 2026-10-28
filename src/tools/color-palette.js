@@ -112,7 +112,7 @@ export function initColorPalette() {
                 <div class="h-24 flex items-center justify-center" style="background:${color.hex}">
                     <span class="text-xs font-black font-mono px-2 py-0.5 rounded" style="color:${contrastColor(color.hex)};background:rgba(0,0,0,0.1)">${color.hex}</span>
                 </div>
-                <div class="bg-white p-2 text-center border-t border-slate-100">
+                <div class="bg-slate-50 p-2 text-center border-t border-slate-100">
                     <p class="text-[10px] text-slate-500 font-mono">rgb(${color.r},${color.g},${color.b})</p>
                     <button class="copy-hex-btn text-[10px] font-bold text-blue-500 hover:text-blue-700 mt-0.5 transition-colors" data-hex="${color.hex}">Copy hex</button>
                 </div>
@@ -120,8 +120,8 @@ export function initColorPalette() {
             swatchesEl.appendChild(swatch);
         });
 
-        const varNames = ['primary', 'secondary', 'accent', 'neutral', 'highlight', 'muted', 'dark', 'light'];
-        const cssLines = palette.map((c, i) => `  --color-${varNames[i] || `extra-${i}`}: ${c.hex};`);
+        // Numbered, most dominant first: names like "dark" or "accent" were often wrong for the actual colour.
+        const cssLines = palette.map((c, i) => `  --color-${i + 1}: ${c.hex};`);
         cssEl.textContent = `:root {\n${cssLines.join('\n')}\n}`;
     }
 

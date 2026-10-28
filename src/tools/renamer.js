@@ -107,11 +107,11 @@ export function initRenamer() {
             const changed = newName !== file.name;
 
             const div = document.createElement('div');
-            div.className = "py-2 px-3 border-b border-slate-100 flex items-center gap-2";
+            div.className = "py-2 px-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-xs font-mono";
             div.innerHTML = `
-                <span class="text-slate-500 text-xs truncate flex-1"></span>
-                <span class="text-slate-300 shrink-0">→</span>
-                <span class="text-xs font-mono truncate flex-1 text-right ${duplicate ? 'text-amber-600 font-bold' : changed ? 'text-blue-600 font-bold' : 'text-slate-400'}"></span>
+                <span class="text-slate-500 truncate"></span>
+                <span class="text-slate-300">→</span>
+                <span class="truncate ${duplicate ? 'text-amber-600 font-bold' : changed ? 'text-blue-600 font-bold' : 'text-slate-400'}"></span>
             `;
             div.children[0].textContent = file.name;
             div.children[2].textContent = newName;

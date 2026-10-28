@@ -88,8 +88,6 @@ export function initSmartResizer() {
 
     toggleManual.addEventListener('click', () => {
         resizeMode = 'manual';
-        manualInputs.classList.remove('opacity-50', 'pointer-events-none');
-        presetRow.classList.remove('opacity-50', 'pointer-events-none');
         updateModeUI();
         debouncedReprocessAll();
     });
@@ -101,13 +99,17 @@ export function initSmartResizer() {
             if (Number.isFinite(width)) widthInp.value = width;
             if (Number.isFinite(height)) heightInp.value = height;
             resizeMode = 'manual';
-            manualInputs.classList.remove('opacity-50', 'pointer-events-none');
-            presetRow.classList.remove('opacity-50', 'pointer-events-none');
             updateModeUI();
             debouncedReprocessAll();
         }));
     }
 
+    // Typing a size is enough to opt into custom sizing; no need to find the toggle first.
+    [widthInp, heightInp].forEach(inp => inp.addEventListener('focus', () => {
+        if (resizeMode === 'manual') return;
+        resizeMode = 'manual';
+        updateModeUI();
+    }));
     [widthInp, heightInp].forEach(inp => inp.addEventListener('change', debouncedReprocessAll));
 
     qualitySlider.addEventListener('input', () => {
@@ -234,13 +236,10 @@ export function initSmartResizer() {
             }
         });
 
-        if (resizeMode !== 'manual') {
-            manualInputs.classList.add('opacity-50', 'pointer-events-none');
-            if (presetRow) presetRow.classList.add('opacity-50', 'pointer-events-none');
-        } else {
-            manualInputs.classList.remove('opacity-50', 'pointer-events-none');
-            if (presetRow) presetRow.classList.remove('opacity-50', 'pointer-events-none');
-        }
+        const manual = resizeMode === 'manual';
+        manualInputs.classList.toggle('opacity-60', !manual);
+        if (presetRow) presetRow.classList.toggle('opacity-60', !manual);
+        if (toggleManual) toggleManual.classList.toggle('hidden', manual);
     }
 
     const imagesLoaded = (n) => `${n} image${n === 1 ? '' : 's'} loaded`;

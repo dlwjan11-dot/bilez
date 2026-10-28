@@ -27,7 +27,7 @@ test.describe('Color palette', () => {
         await expectClipboard(ctx, found[0]);
         await page.click('#palette-copy-css');
         await expectClipboard(ctx, await page.locator('#palette-css').textContent());
-        expect(await ctx.clipboard()).toContain(`--color-primary: ${found[0]};`);
+        expect(await ctx.clipboard()).toContain(`--color-1: ${found[0]};`);
         await shot(page, '08-palette');
     });
 
@@ -43,7 +43,7 @@ test.describe('Color palette', () => {
         const n = await page.locator('#palette-swatches > div').count();
         expect(n, 'more colours than at 4, never above the requested 12').toBeGreaterThan(4);
         expect(n).toBeLessThanOrEqual(12);
-        expect(await page.locator('#palette-css').textContent()).toContain(`--color-${n > 8 ? 'extra-8' : 'light'}`);
+        expect(await page.locator('#palette-css').textContent()).toContain(`--color-${n}:`);
     });
 
     test('new image, non-image file', async ({ ctx }) => {

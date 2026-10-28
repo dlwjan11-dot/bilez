@@ -38,8 +38,8 @@ test.describe('App shell', () => {
 
     test('tooltips appear on hover', async ({ ctx }) => {
         const { page } = ctx;
-        await page.hover('#nav-tabs [data-tab="svg"]');
+        await page.hover('#dark-toggle');
         await expect(page.locator('#app-tooltip')).toHaveClass(/visible/);
-        await expect(page.locator('#app-tooltip')).toContainText('Optimize');
+        await expect(page.locator('#app-tooltip')).toContainText('dark mode');
     });
 });

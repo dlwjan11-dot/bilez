@@ -71,6 +71,7 @@ function applyTooltips() {
         el.addEventListener('mouseenter', show);
         el.addEventListener('mousemove', show);
         el.addEventListener('mouseleave', hide);
+        el.addEventListener('pointerdown', hide);
         el.addEventListener('focus', (event) => show({ clientX: el.getBoundingClientRect().left + (el.offsetWidth / 2), clientY: el.getBoundingClientRect().top }));
         el.addEventListener('blur', hide);
     });

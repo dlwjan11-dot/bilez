@@ -98,7 +98,7 @@ test.describe('Smart Resizer', () => {
         expect([m.width, m.height], 'saved file is exactly the preset size').toEqual([100, 700]);
 
         await page.click('.smart-mode-btn[data-mode="auto"]'); await settle(page);
-        await expect(page.locator('#smart-manual-inputs')).toHaveClass(/pointer-events-none/);
+        await expect(page.locator('#smart-manual-inputs')).toHaveClass(/opacity-60/);
     });
 
     test('global and per-image quality sliders change output size', async ({ ctx }) => {
