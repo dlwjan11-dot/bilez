@@ -53,6 +53,7 @@ export function initSmartResizer() {
     const debouncedReprocessAll = debounce(function () {
         const globalQ = parseFloat(qualitySlider.value);
         processedFiles.forEach((item, idx) => {
+            if (item.removed) return; // card is gone; indices stay stable so skip, don't splice
             const itemSlider = document.getElementById(`smart-item-q-${idx}`);
             const itemQVal = document.getElementById(`smart-item-q-val-${idx}`);
             if (itemSlider && itemQVal) {
@@ -362,6 +363,7 @@ export function initSmartResizer() {
 
     async function processSingleImage(idx, targetQuality) {
         const item = processedFiles[idx];
+        if (!item || item.removed) return;
         const file = item.file;
 
         const gen = (processGens[idx] || 0) + 1;
