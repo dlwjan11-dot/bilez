@@ -15,6 +15,10 @@ Node version is pinned in `.nvmrc` (22.12.0; `engines` requires >=20.19).
 - `npm run electron` — run Electron against the built `dist/index.html`. Run `npm run build` first. To point Electron at the dev server instead, set `VITE_DEV_SERVER_URL` (e.g. `http://localhost:5173`) before `npm run electron`.
 - `npm run build-exe` — build + package Windows NSIS installer into `release/` (unpacked app at `release/win-unpacked/dev-suite.exe`, which the `Launch-Dev-Suite*.bat` files start). `npm run build-mac` for DMG.
 
+### E2E tests
+
+`npm test` runs Playwright against the real Electron app (main process + `dist/`). Global setup regenerates fixtures (`tests/fixtures/generate.mjs`) and rebuilds `dist/` first, so no manual build is needed. One spec per tool in `tests/e2e/`; each test launches a fresh app with native save dialogs stubbed to write into `tests/output/<test>/`. Single spec: `npx playwright test 07` (filename match) or `-g "test title"`. `npm run test:report` prints a compact list of failed checks; screenshots go to `tests/screenshots/`, console/main-process logs to `tests/results/console-log.jsonl`. Many checks are `expect.soft` so one run reports every problem in a tool.
+
 `package.json` references `icon.ico` for the window/installer icon, but it is not currently in the repo.
 
 ## Architecture
