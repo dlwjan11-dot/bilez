@@ -49,7 +49,7 @@ test.describe('Renamer', () => {
         await expect(page.locator('#renamer-file-count')).toHaveText('2 files loaded');
 
         const names = await previewNames(page);
-        expect(names).toEqual(['small.jpg', 'small.jpg']);
+        expect(names, 'second file numbered instead of overwriting the first').toEqual(['small.jpg', 'small-2.jpg']);
         expect.soft(await page.locator('#renamer-preview-panel').textContent(), 'duplicate output names should be flagged').toMatch(/duplicate|conflict|same name/i);
 
         await page.click('#renamer-download');

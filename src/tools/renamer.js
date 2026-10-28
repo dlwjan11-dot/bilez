@@ -85,26 +85,51 @@ export function initRenamer() {
         return base + ext;
     }
 
+    // Names must be unique or the ZIP silently keeps only the last file with that name.
+    // Duplicates (case-insensitive, as on Windows) get "-2", "-3"… before the extension.
+    function computeAllNames(settings) {
+        const used = new Set();
+        return files.map((file, idx) => {
+            const name = computeNewName(file, idx, settings);
+            let unique = name;
+            if (used.has(unique.toLowerCase())) {
+                const dot = name.lastIndexOf('.');
+                const base = dot > 0 ? name.slice(0, dot) : name;
+                const ext = dot > 0 ? name.slice(dot) : '';
+                let n = 2;
+                while (used.has(`${base}-${n}${ext}`.toLowerCase())) n++;
+                unique = `${base}-${n}${ext}`;
+            }
+            used.add(unique.toLowerCase());
+            return { name: unique, duplicate: unique !== name };
+        });
+    }
+
     function updatePreview() {
         if (!files.length) return;
-        const settings = getSettings();
+        const names = computeAllNames(getSettings());
         listEl.innerHTML = '';
 
         files.forEach((file, idx) => {
-            const newName = computeNewName(file, idx, settings);
+            const { name: newName, duplicate } = names[idx];
             const changed = newName !== file.name;
 
             const div = document.createElement('div');
             div.className = "py-2 px-3 border-b border-slate-100 flex items-center gap-2";
             div.innerHTML = `
-                <span class="text-slate-500 text-xs truncate flex-1">${file.name}</span>
+                <span class="text-slate-500 text-xs truncate flex-1"></span>
                 <span class="text-slate-300 shrink-0">→</span>
-                <span class="text-xs font-mono truncate flex-1 text-right ${changed ? 'text-blue-600 font-bold' : 'text-slate-400'}">${newName}</span>
+                <span class="text-xs font-mono truncate flex-1 text-right ${duplicate ? 'text-amber-600 font-bold' : changed ? 'text-blue-600 font-bold' : 'text-slate-400'}"></span>
             `;
+            div.children[0].textContent = file.name;
+            div.children[2].textContent = newName;
+            if (duplicate) div.children[2].title = 'Duplicate name — numbered to keep both files';
             listEl.appendChild(div);
         });
 
-        statusEl.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} ready.`;
+        const dupes = names.filter(n => n.duplicate).length;
+        statusEl.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} ready.`
+            + (dupes ? ` ${dupes} duplicate name${dupes !== 1 ? 's were' : ' was'} numbered so no file is lost.` : '');
     }
 
     dlBtn.addEventListener('click', async () => {
@@ -113,9 +138,9 @@ export function initRenamer() {
         dlBtn.textContent = "Zipping...";
         dlBtn.disabled = true;
 
-        const settings = getSettings();
+        const names = computeAllNames(getSettings());
         const zipFiles = await Promise.all(files.map(async (file, idx) => ({
-            name: computeNewName(file, idx, settings),
+            name: names[idx].name,
             data: await file.arrayBuffer()
         })));
         await downloadZip(zipFiles, 'renamed_files.zip');
