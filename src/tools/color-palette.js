@@ -57,9 +57,10 @@ export function initColorPalette() {
         const buckets = new Map();
         for (let i = 0; i < data.length; i += 4) {
             if (data[i + 3] < 128) continue; // skip transparent
-            const r = Math.round(data[i] / 16) * 16;
-            const g = Math.round(data[i + 1] / 16) * 16;
-            const b = Math.round(data[i + 2] / 16) * 16;
+            // Clamp: rounding 248-255 up gives 256, which would overflow into the next channel
+            const r = Math.min(255, Math.round(data[i] / 16) * 16);
+            const g = Math.min(255, Math.round(data[i + 1] / 16) * 16);
+            const b = Math.min(255, Math.round(data[i + 2] / 16) * 16);
             const key = (r << 16) | (g << 8) | b;
             buckets.set(key, (buckets.get(key) || 0) + 1);
         }
