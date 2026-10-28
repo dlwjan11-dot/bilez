@@ -134,7 +134,15 @@ export function initImageCropper() {
         const top = clamp(crop.y * sy, natH);
         const right = clamp((crop.x + crop.w) * sx, natW);
         const bottom = clamp((crop.y + crop.h) * sy, natH);
-        return { left, top, width: right - left, height: bottom - top };
+        let width = right - left;
+        let height = bottom - top;
+        // sx and sy differ slightly (the canvas size is rounded), so with a locked ratio
+        // derive the height from the width in source pixels to keep e.g. 1:1 exactly square
+        if (aspectRatio) {
+            height = Math.min(Math.round(width / aspectRatio), natH - top);
+            width = Math.min(width, Math.round(height * aspectRatio));
+        }
+        return { left, top, width, height };
     }
 
     function updateDims() {
@@ -162,7 +170,9 @@ export function initImageCropper() {
         if (hit(crop.x + crop.w, crop.y)) return 'tr';
         if (hit(crop.x, crop.y + crop.h)) return 'bl';
         if (hit(crop.x + crop.w, crop.y + crop.h)) return 'br';
-        if (x >= crop.x && x <= crop.x + crop.w && y >= crop.y && y <= crop.y + crop.h) return 'move';
+        // A selection covering the whole image cannot move, so dragging inside it draws a new one
+        const isFull = crop.x <= 0 && crop.y <= 0 && crop.w >= canvas.width && crop.h >= canvas.height;
+        if (!isFull && x >= crop.x && x <= crop.x + crop.w && y >= crop.y && y <= crop.y + crop.h) return 'move';
         return 'new';
     }
 
@@ -177,25 +187,30 @@ export function initImageCropper() {
         }
 
         if (dragMode === 'new') {
-            let dx = x - dragStart.x;
-            let dy = y - dragStart.y;
             if (aspectRatio) {
-                const absDx = Math.abs(dx), absDy = Math.abs(dy);
-                if (absDx / aspectRatio > absDy) dy = Math.sign(dy || 1) * absDx / aspectRatio;
-                else dx = Math.sign(dx || 1) * absDy * aspectRatio;
+                crop = ratioRect(dragStart.x, dragStart.y, x, y);
+            } else {
+                const dx = x - dragStart.x;
+                const dy = y - dragStart.y;
+                crop = {
+                    x: dx >= 0 ? dragStart.x : dragStart.x + dx,
+                    y: dy >= 0 ? dragStart.y : dragStart.y + dy,
+                    w: Math.abs(dx),
+                    h: Math.abs(dy),
+                };
+                clampCrop();
             }
-            crop = {
-                x: dx >= 0 ? dragStart.x : dragStart.x + dx,
-                y: dy >= 0 ? dragStart.y : dragStart.y + dy,
-                w: Math.abs(dx),
-                h: Math.abs(dy),
-            };
-            clampCrop();
         } else if (dragMode === 'move') {
             const dx = x - dragStart.x;
             const dy = y - dragStart.y;
             crop.x = Math.max(0, Math.min(canvas.width - crop.w, cropAtDragStart.x + dx));
             crop.y = Math.max(0, Math.min(canvas.height - crop.h, cropAtDragStart.y + dy));
+        } else if (aspectRatio) {
+            // Resize from a corner with the ratio locked, anchored on the opposite corner
+            const s = cropAtDragStart;
+            const ax = dragMode === 'tl' || dragMode === 'bl' ? s.x + s.w : s.x;
+            const ay = dragMode === 'tl' || dragMode === 'tr' ? s.y + s.h : s.y;
+            crop = ratioRect(ax, ay, x, y, 10);
         } else {
             const c = { ...cropAtDragStart };
             if (dragMode === 'br') {
@@ -218,10 +233,6 @@ export function initImageCropper() {
                 c.w = c.x + c.w - Math.max(0, nx);
                 c.x = Math.max(0, nx);
                 c.h = Math.max(10, Math.min(canvas.height - c.y, y - c.y));
-            }
-            // Aspect ratio only constrains br-handle resize (natural UX); other corners resize freely
-            if (aspectRatio && dragMode === 'br') {
-                c.h = Math.max(10, c.w / aspectRatio);
             }
             crop = c;
         }
@@ -259,6 +270,18 @@ export function initImageCropper() {
         updateDims();
     });
 
+    // Largest rect with the locked ratio from anchor (ax, ay) towards the pointer that still
+    // fits inside the canvas. Shrinks both sides together, so the ratio survives the edges.
+    function ratioRect(ax, ay, px, py, minW = 0) {
+        const sx = px >= ax ? 1 : -1;
+        const sy = py >= ay ? 1 : -1;
+        const maxW = Math.min(sx > 0 ? canvas.width - ax : ax, (sy > 0 ? canvas.height - ay : ay) * aspectRatio);
+        let w = Math.max(Math.abs(px - ax), Math.abs(py - ay) * aspectRatio, minW);
+        w = Math.min(w, maxW);
+        const h = w / aspectRatio;
+        return { x: sx > 0 ? ax : ax - w, y: sy > 0 ? ay : ay - h, w, h };
+    }
+
     function clampCrop() {
         crop.x = Math.max(0, crop.x);
         crop.y = Math.max(0, crop.y);
@@ -281,10 +304,11 @@ export function initImageCropper() {
             } else {
                 const [w, h] = r.split(':').map(Number);
                 aspectRatio = w / h;
-                // Reshape current crop to match the new ratio, anchoring top-left
+                // Largest rect of the new ratio that fits inside the current crop, centred in it
                 if (crop.w > 0 && crop.h > 0) {
-                    crop.h = crop.w / aspectRatio;
-                    clampCrop();
+                    const w = Math.min(crop.w, crop.h * aspectRatio);
+                    const h = w / aspectRatio;
+                    crop = { x: crop.x + (crop.w - w) / 2, y: crop.y + (crop.h - h) / 2, w, h };
                     draw();
                     updateDims();
                 }

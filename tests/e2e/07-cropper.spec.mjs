@@ -62,6 +62,9 @@ test.describe('Image cropper', () => {
         await page.click('.crop-ratio-btn[data-ratio="1:1"]');
         let [w, h] = await dimsLabel(page);
         expect.soft(w, `1:1 on the full selection (${w}×${h})`).toBe(h);
+        await page.click('#crop-download');
+        const sq = await meta(await expectSaved(ctx.out('large_cropped.jpg')));
+        expect([sq.width, sq.height], 'saved 1:1 crop is square').toEqual([3000, 3000]);
 
         await page.click('#crop-reset-selection');
         await page.click('.crop-ratio-btn[data-ratio="free"]');
