@@ -86,8 +86,6 @@ ipcMain.handle('process-image-sharp', async (event, config) => {
       engine = engine.jpeg({ quality: Math.round(quality * 100) });
     } else if (format === 'png') {
       engine = engine.png({ quality: Math.round(quality * 100) });
-    } else if (format === 'jxl') {
-      engine = engine.jxl({ quality: Math.round(quality * 100) });
     }
 
     // 4. THE MAGIC BULLET: Keep all Alt Text, EXIF, and XMP data

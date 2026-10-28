@@ -158,9 +158,9 @@ export function initSmartResizer() {
                 const baseName = item.file.name.replace(/\.[^/.]+$/, '');
                 const sourceFormat = (item.file.type || '').split('/')[1] || 'jpeg';
                 const sharpFmt = fmt === 'keep'
-                    ? (sourceFormat === 'png' ? 'png' : sourceFormat === 'webp' ? 'webp' : sourceFormat === 'jxl' ? 'jxl' : 'jpeg')
+                    ? (sourceFormat === 'png' ? 'png' : sourceFormat === 'webp' ? 'webp' : 'jpeg')
                     : fmt;
-                const ext = sharpFmt === 'png' ? '.png' : sharpFmt === 'webp' ? '.webp' : sharpFmt === 'jxl' ? '.jxl' : '.jpg';
+                const ext = sharpFmt === 'png' ? '.png' : sharpFmt === 'webp' ? '.webp' : '.jpg';
 
                 for (const size of sizes) {
                     dlAllBtn.textContent = `${Math.round((done / total) * 100)}%`;
@@ -433,36 +433,28 @@ export function initSmartResizer() {
             }
 
             const fmt = document.querySelector('input[name="smart-fmt"]:checked').value;
-            const browserFallbackNeeded = !ipcRenderer && (fmt === 'jxl' || fmt === 'keep' && file.type === 'image/jxl');
-            const effectiveFormat = browserFallbackNeeded ? 'jpeg' : fmt;
 
             let mime = 'image/jpeg';
             let ext = '.jpg';
 
-            if (effectiveFormat === 'webp') {
+            if (fmt === 'webp') {
                 mime = 'image/webp'; ext = '.webp';
-            } else if (effectiveFormat === 'jpeg') {
+            } else if (fmt === 'jpeg') {
                 mime = 'image/jpeg'; ext = '.jpg';
-            } else if (effectiveFormat === 'jxl') {
-                mime = 'image/jxl'; ext = '.jxl';
-            } else if (effectiveFormat === 'keep') {
+            } else if (fmt === 'keep') {
                 const allowedMime = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
-                mime = ['image/png', 'image/jpeg', 'image/webp', 'image/avif', 'image/heic', 'image/heif', 'image/bmp', 'image/jxl'].includes(allowedMime)
+                mime = ['image/png', 'image/jpeg', 'image/webp', 'image/avif', 'image/heic', 'image/heif', 'image/bmp'].includes(allowedMime)
                     ? allowedMime
                     : 'image/jpeg';
-                ext = mime === 'image/png' ? '.png' : mime === 'image/webp' ? '.webp' : mime === 'image/jxl' ? '.jxl' : '.jpg';
-            }
-
-            if (browserFallbackNeeded) {
-                showToast('JXL is not supported in browser mode, so the output was converted to JPEG for preview/export.', 'warning');
+                ext = mime === 'image/png' ? '.png' : mime === 'image/webp' ? '.webp' : '.jpg';
             }
 
             const fileBuffer = await file.arrayBuffer();
             if (processGens[idx] !== gen) return;
 
-            const formatName = effectiveFormat === 'keep'
+            const formatName = fmt === 'keep'
                 ? mime.split('/')[1].replace('jpeg', 'jpg')
-                : effectiveFormat;
+                : fmt;
 
             let bufferArray;
             if (ipcRenderer) {

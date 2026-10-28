@@ -116,7 +116,7 @@ test.describe('Smart Resizer', () => {
         expect(max, 'per-image 100% → bigger than 30%').toBeGreaterThan(lo);
     });
 
-    test('output formats: JPG, Original (PNG/WebP), JXL', async ({ ctx }) => {
+    test('output formats: JPG, Original (PNG/WebP); no JXL', async ({ ctx }) => {
         const { page } = ctx;
         await uploadViaClick(page, '#smart-drop', ['portrait.png', 'landscape.webp']);
         await settle(page);
@@ -128,15 +128,9 @@ test.describe('Smart Resizer', () => {
         expect((await meta(await saveCard(ctx, 0, 'portrait-min.png'))).format).toBe('png');
         expect((await meta(await saveCard(ctx, 1, 'landscape-min.webp'))).format).toBe('webp');
 
-        await page.check('input[name="smart-fmt"][value="jxl"]');
-        let finished = true;
-        try { await settle(page, 15000); } catch { finished = false; }
-        expect.soft(finished, 'JXL: cards should finish processing (not stay on "Processing..." forever)').toBe(true);
-        const dimsText = await dims(page, 0);
-        expect.soft(dimsText, 'JXL: card should not show Error').not.toBe('Error');
-        await page.click('#smart-dl-0', { force: true });
-        expect.soft(await waitForFile(ctx.out('portrait-min.jxl'), 4000), 'JXL file saved').not.toBeNull();
-        await shot(page, '01-smart-resizer-jxl');
+        // The bundled sharp build cannot encode JXL, so the option was removed
+        await expect(page.locator('input[name="smart-fmt"][value="jxl"]')).toHaveCount(0);
+        expect(await page.locator('input[name="smart-fmt"]').evaluateAll(els => els.map(e => e.value))).toEqual(['webp', 'jpeg', 'keep']);
     });
 
     test('checkboxes: suffix, upscale, bypass', async ({ ctx }) => {
