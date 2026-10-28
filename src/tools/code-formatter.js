@@ -90,24 +90,56 @@ export function initCodeFormatter() {
         errorEl.classList.add('hidden');
     }
 
+    // Swap quoted strings (and optionally other spans) for placeholders so whitespace and
+    // punctuation rules never touch their contents, then put them back afterwards.
+    function protect(text, pattern) {
+        const saved = [];
+        const masked = text.replace(pattern, m => `\u0000${saved.push(m) - 1}\u0000`);
+        return { masked, restore: s => s.replace(/\u0000(\d+)\u0000/g, (_, i) => saved[i]) };
+    }
+
+    const CSS_STRINGS = /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g;
+
+    // Walks the CSS so ; { } inside strings or parentheses (url(data:...;base64,...)) are left alone
     function formatCSS(css) {
-        return css
-            .replace(/\/\*[\s\S]*?\*\//g, m => `\n${m}\n`)
-            .replace(/\s*\{\s*/g, ' {\n    ')
-            .replace(/\s*;\s*/g, ';\n    ')
-            .replace(/\s*\}\s*/g, '\n}\n')
-            .replace(/\n {4}(\n\})/g, '\n$1')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
+        const { masked, restore } = protect(css, CSS_STRINGS);
+        const lines = [];
+        let depth = 0;
+        let parens = 0;
+        let line = '';
+        const push = (text) => { if (text.trim()) lines.push('    '.repeat(depth) + text.trim()); };
+        const flush = () => { push(line); line = ''; };
+
+        for (let i = 0; i < masked.length; i++) {
+            const ch = masked[i];
+            if (ch === '/' && masked[i + 1] === '*') {
+                const end = masked.indexOf('*/', i + 2);
+                const stop = end === -1 ? masked.length : end + 2;
+                flush();
+                push(masked.slice(i, stop));
+                i = stop - 1;
+                continue;
+            }
+            if (ch === '(') parens++;
+            if (ch === ')') parens = Math.max(0, parens - 1);
+            if (parens === 0 && ch === '{') { line = line.trim() + ' {'; flush(); depth++; continue; }
+            if (parens === 0 && ch === ';') { line += ';'; flush(); continue; }
+            if (parens === 0 && ch === '}') { flush(); depth = Math.max(0, depth - 1); push('}'); continue; }
+            if (/\s/.test(ch)) { if (line && !line.endsWith(' ')) line += ' '; continue; }
+            line += ch;
+        }
+        flush();
+        return restore(lines.join('\n'));
     }
 
     function minifyCSS(css) {
-        return css
+        const { masked, restore } = protect(css, CSS_STRINGS);
+        return restore(masked
             .replace(/\/\*[\s\S]*?\*\//g, '')
             .replace(/\s+/g, ' ')
             .replace(/\s*([{};:,>~+])\s*/g, '$1')
             .replace(/;}/g, '}')
-            .trim();
+            .trim());
     }
 
     const VOID_TAGS = /^(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)$/i;
@@ -122,21 +154,27 @@ export function initCodeFormatter() {
                 if (!line) return null;
                 const isClose = /^<\/[^>]+>/.test(line);
                 const isOpen  = /^<[^\/!][^>]*>/.test(line) && !VOID_TAGS.test((line.match(/^<([^\s>\/]+)/) || [])[1] || '');
-                const isSelfClose = /\/>$/.test(line) || VOID_TAGS.test((line.match(/^<([^\s>\/]+)/) || [])[1] || '');
+                const tag = (line.match(/^<([^\s>\/]+)/) || [])[1] || '';
+                const isSelfClose = /\/>$/.test(line) || VOID_TAGS.test(tag);
+                // <p>Hello</p> opens and closes on the same line, so it must not indent what follows
+                const closesOnSameLine = tag && new RegExp(`</${tag}\\s*>$`, 'i').test(line);
                 if (isClose) indent = Math.max(0, indent - 1);
                 const out = '  '.repeat(indent) + line;
-                if (isOpen && !isSelfClose && !isClose) indent++;
+                if (isOpen && !isSelfClose && !isClose && !closesOnSameLine) indent++;
                 return out;
             })
             .filter(l => l !== null)
             .join('\n');
     }
 
+    // Whitespace is significant inside these, so they are kept byte-for-byte
+    const RAW_BLOCKS = /<(pre|textarea|script|style)\b[\s\S]*?<\/\1\s*>/gi;
+
     function minifyHTML(html) {
-        return html
-            .replace(/<!--[\s\S]*?-->/g, '')
+        const { masked, restore } = protect(html.replace(/<!--[\s\S]*?-->/g, ''), RAW_BLOCKS);
+        return restore(masked
             .replace(/\s+/g, ' ')
             .replace(/>\s+</g, '><')
-            .trim();
+            .trim());
     }
 }
