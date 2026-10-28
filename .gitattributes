@@ -1,0 +1,3 @@
+# Fixtures are byte-exact test inputs (PDF xref offsets break under CRLF conversion)
+tests/fixtures/** -text
+tests/fixtures/generate.mjs text
