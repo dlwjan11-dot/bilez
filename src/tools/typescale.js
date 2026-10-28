@@ -43,7 +43,14 @@ export function initTypescale() {
     }
 
     function generateTypeScale() {
-        const targetVal = parseFloat(base.value) || 16;
+        // Sizes must be positive; fall back to 16px and flag the field rather than emit negative px
+        const entered = parseFloat(base.value);
+        const invalid = base.value !== '' && !(entered > 0);
+        base.classList.toggle('border-red-400', invalid);
+        base.classList.toggle('ring-2', invalid);
+        base.classList.toggle('ring-red-200', invalid);
+        base.title = invalid ? 'Enter a size greater than 0' : '';
+        const targetVal = entered > 0 ? entered : 16;
         const r = parseFloat(scale.value) || 1.25;
         const f = font.value || 'Inter';
         const calcMode = mode ? mode.value : 'base';

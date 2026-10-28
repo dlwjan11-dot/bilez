@@ -60,5 +60,11 @@ test.describe('Typescale', () => {
         expect(await css(page)).toContain('--text-base: 16.00px;');
         await page.fill('#ts-base', '-10');
         expect.soft(await css(page), 'negative size should be rejected, not produce negative px').not.toMatch(/: -\d/);
+        await expect(page.locator('#ts-base'), 'invalid size is flagged').toHaveClass(/border-red-400/);
+        await page.fill('#ts-base', '0');
+        expect(await css(page)).toContain('--text-base: 16.00px;');
+        await page.fill('#ts-base', '18');
+        expect(await css(page)).toContain('--text-base: 18.00px;');
+        await expect(page.locator('#ts-base')).not.toHaveClass(/border-red-400/);
     });
 });
