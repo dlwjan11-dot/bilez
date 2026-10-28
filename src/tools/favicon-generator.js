@@ -59,7 +59,16 @@ export function initFaviconGenerator() {
         drop.classList.remove('drag-active');
         handleFile(e.dataTransfer.files[0]);
     });
-    input.addEventListener('change', e => handleFile(e.target.files[0]));
+    input.addEventListener('change', e => { handleFile(e.target.files[0]); input.value = ''; });
+
+    const changeBtn = document.getElementById('fav-change');
+    if (changeBtn) {
+        changeBtn.addEventListener('click', () => {
+            sourceImage = null;
+            ui.classList.add('hidden');
+            drop.classList.remove('hidden');
+        });
+    }
 
     function handleFile(file) {
         if (!file || !file.type.startsWith('image/')) {

@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import sharp from 'sharp';
 import { test, expect, openTool, uploadViaClick, dropFiles, expectSaved, waitForFile, readZip, meta, shot } from '../helpers.mjs';
 
 const SPECS = {
@@ -77,12 +79,21 @@ test.describe('Favicon generator', () => {
         const { page } = ctx;
         await uploadViaClick(page, '#fav-drop', ['logo-square.png']);
         await expect(page.locator('#fav-ui')).toBeVisible();
-        const canChange = await page.locator('#fav-drop').isVisible()
-            || await page.locator('#tool-favicon button:has-text("Change"), #tool-favicon button:has-text("New"), #tool-favicon button:has-text("another")').count() > 0;
-        expect.soft(canChange, 'no way to pick a different logo without restarting the app').toBe(true);
         await page.click('#fav-generate-btn');
         await expectSaved(ctx.out('website_icons.zip'));
-        await page.click('#fav-generate-btn', { timeout: 3000 }).catch(() => {});
-        expect(await waitForFile(ctx.out('website_icons.zip'))).not.toBeNull();
+
+        await page.click('#fav-change');
+        await expect(page.locator('#fav-drop')).toBeVisible();
+        await expect(page.locator('#fav-ui')).toBeHidden();
+        await uploadViaClick(page, '#fav-drop', ['wide-banner.png']);
+        await expect(page.locator('#fav-ui')).toBeVisible();
+        await expect.poll(() => page.locator('#fav-preview').evaluate(i => i.naturalWidth)).toBe(800);
+        fs.rmSync(ctx.out('website_icons.zip'));
+        await expect(page.locator('#fav-generate-btn')).toBeEnabled({ timeout: 5000 });
+        await page.click('#fav-generate-btn');
+        const entries = await readZip(await expectSaved(ctx.out('website_icons.zip')));
+        // the old logo was a circle on transparency; the banner crop is fully opaque
+        const { isOpaque } = await sharp(entries['icon-512x512.png']).stats();
+        expect(isOpaque, 'icons were made from the new logo').toBe(true);
     });
 });
