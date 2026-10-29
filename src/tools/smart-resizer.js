@@ -144,7 +144,7 @@ export function initSmartResizer() {
     });
 
     dlAllBtn.addEventListener('click', async () => {
-        const useMultiSize = multiSizeCheckbox && multiSizeCheckbox.checked && ipcRenderer;
+        const useMultiSize = multiSizeCheckbox && multiSizeCheckbox.checked;
 
         if (useMultiSize) {
             const sizesText = multiSizesInput ? multiSizesInput.value : '';
@@ -163,7 +163,15 @@ export function initSmartResizer() {
 
             for (const item of processedFiles) {
                 if (!item.file || item.removed) continue;
-                const fileBuffer = await item.file.arrayBuffer();
+                const fileBuffer = ipcRenderer ? await item.file.arrayBuffer() : null;
+                let bitmap = null;
+                if (!ipcRenderer) {
+                    try { bitmap = await createImageBitmap(item.file); } catch (e) {
+                        console.error(`Multi-size decode error for ${item.file.name}:`, e);
+                        done += sizes.length;
+                        continue;
+                    }
+                }
                 const baseName = item.file.name.replace(/\.[^/.]+$/, '');
                 const sourceFormat = (item.file.type || '').split('/')[1] || 'jpeg';
                 const sharpFmt = fmt === 'keep'
@@ -174,17 +182,33 @@ export function initSmartResizer() {
                 for (const size of sizes) {
                     dlAllBtn.textContent = `${Math.round((done / total) * 100)}%`;
                     try {
-                        const result = await ipcRenderer.invoke('process-image-sharp', {
-                            fileData: fileBuffer, targetW: size, targetH: null,
-                            quality, format: sharpFmt,
-                            allowUpscale: upscaleCheckbox ? upscaleCheckbox.checked : false,
-                        });
-                        zipFiles.push({ name: `${baseName}_${size}w${ext}`, data: result });
+                        const allowUpscale = upscaleCheckbox ? upscaleCheckbox.checked : false;
+                        if (ipcRenderer) {
+                            const result = await ipcRenderer.invoke('process-image-sharp', {
+                                fileData: fileBuffer, targetW: size, targetH: null,
+                                quality, format: sharpFmt, allowUpscale,
+                            });
+                            zipFiles.push({ name: `${baseName}_${size}w${ext}`, data: result });
+                        } else {
+                            // Browser: same as sharp's fit 'inside' with a width only
+                            const w = allowUpscale ? size : Math.min(size, bitmap.width);
+                            const h = Math.max(1, Math.round(w * bitmap.height / bitmap.width));
+                            const canvas = document.createElement('canvas');
+                            canvas.width = w; canvas.height = h;
+                            canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+                            const type = sharpFmt === 'png' ? 'image/png' : sharpFmt === 'webp' ? 'image/webp' : 'image/jpeg';
+                            const blob = await new Promise(r => canvas.toBlob(r, type, Math.min(1, Math.max(0.1, quality))));
+                            if (!blob) throw new Error('Canvas export failed');
+                            // a browser without WebP encoding falls back to PNG
+                            const outExt = blob.type === 'image/png' ? '.png' : blob.type === 'image/webp' ? '.webp' : '.jpg';
+                            zipFiles.push({ name: `${baseName}_${size}w${outExt}`, data: await blob.arrayBuffer() });
+                        }
                     } catch (e) {
                         console.error(`Multi-size error for ${item.file.name} @ ${size}w:`, e);
                     }
                     done++;
                 }
+                if (bitmap) bitmap.close();
             }
 
             dlAllBtn.textContent = 'Zipping…';

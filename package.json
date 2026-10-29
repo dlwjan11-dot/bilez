@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:web": "vite build --mode web",
     "preview": "vite preview",
     "electron": "electron .",
     "electron-build": "electron-builder",
@@ -57,6 +58,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.0",
+    "fflate": "^0.8.3",
     "jszip": "^3.10.1",
     "sharp": "^0.35.0",
     "svgo": "^4.0.1",

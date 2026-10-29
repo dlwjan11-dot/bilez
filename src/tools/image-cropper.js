@@ -355,7 +355,13 @@ export function initImageCropper() {
             const out = document.createElement('canvas');
             out.width = imgW; out.height = imgH;
             out.getContext('2d').drawImage(sourceImg, imgX, imgY, imgW, imgH, 0, 0, imgW, imgH);
-            out.toBlob(blob => downloadBlob(blob, outName), 'image/png');
+            // keep the source format where the browser can encode it, PNG otherwise
+            const type = ['image/jpeg', 'image/webp'].includes(sourceFile.type) ? sourceFile.type : 'image/png';
+            out.toBlob(blob => {
+                if (!blob) { showToast('Crop failed: the browser could not export the image.', 'error'); return; }
+                const ext = blob.type === 'image/jpeg' ? '.jpg' : blob.type === 'image/webp' ? '.webp' : '.png';
+                downloadBlob(blob, outName.replace(/(\.[^.]+)?$/, ext));
+            }, type, 0.92);
             return;
         }
 

@@ -1,5 +1,8 @@
-// File writes and ZIP creation go through the main process via IPC.
+// In Electron, file writes and ZIP creation go through the main process via IPC.
 // This avoids Vite's Buffer polyfill (JSZip uses Buffer, Vite injects a broken polyfill).
+// In a plain browser (the web version) ZIPs are built with fflate, which needs no Buffer.
+import { zipSync } from 'fflate';
+
 let _ipc;
 if (window.require) {
     _ipc = window.require('electron').ipcRenderer;
@@ -53,6 +56,16 @@ export async function downloadZip(files, filename) {
                 : f.data instanceof Uint8Array ? f.data.buffer : f.data
         }));
         await _ipc.invoke('create-zip', { files: normalized, filename });
+        return;
     }
-    // No browser fallback needed — this app only runs in Electron
+    // Browser: already-compressed formats are stored, everything else is deflated
+    const stored = /\.(jpe?g|png|webp|avif|gif|jxl|zip|pdf)$/i;
+    const entries = {};
+    for (const f of files) {
+        const data = typeof f.data === 'string' ? new TextEncoder().encode(f.data)
+            : f.data instanceof Uint8Array ? f.data : new Uint8Array(f.data);
+        entries[f.name] = [data, { level: stored.test(f.name) ? 0 : 6 }];
+    }
+    const bytes = zipSync(entries);
+    browserSave(URL.createObjectURL(new Blob([bytes], { type: 'application/zip' })), filename);
 }
